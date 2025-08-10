@@ -120,6 +120,13 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
         path: `/student/extra`,
       },
     ],
+    trainer: [
+      {
+        label: "Extracurricular",
+        icon: Users,
+        path: `/student/extra`,
+      }
+    ]
   };
 
   // Combine common items with role-specific items
@@ -137,6 +144,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
     teacher: [{ label: "Profile", icon: User, path: "/profileteacher" }],
     master: [{ label: "Profile", icon: User, path: "/profileteacher" }],
     student: [{ label: "Profile", icon: User, path: "/profilestudent" }],
+    trainer: [{ label: "Profile", icon: User, path: "/profiletrainer" }],
   };
 
   const profileItems = roleProfileItems[role] || [];
@@ -155,6 +163,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       "/rules": [/^\/rules$/],
       "/profilestudent": [/^\/profilestudent$/],
       "/profileteacher": [/^\/profileteacher$/],
+      "/profiletrainer": [/^\/profiletrainer$/],
       [`/studentbio/accomplishments/${studentId}`]: [
         new RegExp(`^/studentbio/accomplishments/${studentId}$`),
         new RegExp(`^/studentbio/accomplishments/${studentId}/.*$`),
