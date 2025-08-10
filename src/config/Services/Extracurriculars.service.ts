@@ -10,6 +10,18 @@ export const ApiExtracurriculars = {
     ApiRequest({ url: "/extracurriculars", method: "GET" }),
   getAllHistory: (): Promise<IExtracurricularHistory[]> =>
     ApiRequest({ url: "/extracurriculars-history", method: "GET" }),
+  getHistoryByTrainer: (): Promise<IExtracurricularHistory[]> =>
+    ApiRequest({
+      url: "/extracurricular/histories/by-trainer",
+      method: "GET",
+    }),
+  updateStatusHistory: (
+    history_id: number
+  ): Promise<IExtracurricularHistory[]> =>
+    ApiRequest({
+      url: `/extracurricular-history/${history_id}/status`,
+      method: "GET",
+    }),
   getById: (id: number): Promise<IExtracurricular> =>
     ApiRequest({ url: `/extracurriculars/${id}`, method: "GET" }),
   getByStudentId: (student_id: string): Promise<IExtracurricular[]> =>
@@ -30,13 +42,12 @@ export const ApiExtracurriculars = {
       body: payload,
     });
   },
-  deleteForMe: (
-  ): Promise<IChooseExtracurricular[]> => {
+  deleteForMe: (): Promise<IChooseExtracurricular[]> => {
     return ApiRequest({
       url: "/me/extracurriculars",
       method: "POST",
-      body: {_method: "DELETE", },
-    })
+      body: { _method: "DELETE" },
+    });
   },
   create: (data: Partial<IExtracurricular>): Promise<IExtracurricular> =>
     ApiRequest({ url: "/extracurriculars", method: "POST", body: data }),
