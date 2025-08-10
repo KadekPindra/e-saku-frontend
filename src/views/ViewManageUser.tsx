@@ -1123,8 +1123,9 @@ const ViewManageUser = () => {
   //   </div>
   // );
 
-  <>
-  </>
+  return (
+    <></>
+  )
 };
 
 export default ViewManageUser;

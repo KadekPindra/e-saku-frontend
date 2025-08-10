@@ -236,7 +236,7 @@ const ViewProfileTeacher = () => {
 
     updateMutation.mutate(
       {
-        id: teacherId,
+        id: Number(teacherId),
         data: updateData,
       },
       {
@@ -438,7 +438,7 @@ const ViewProfileTeacher = () => {
                         }
                         className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 text-center"
                       >
-                        {classroom.name}
+                        {classroom.display_name}
                       </button>
                     ))}
                   </div>
@@ -584,7 +584,7 @@ const ViewProfileTeacher = () => {
                       Dibuat Pada
                     </label>
                     <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                      {formatDate(formData.created_at)}
+                      {formatDate(formData.created_at ?? "")}
                     </div>
                   </div>
 
@@ -593,7 +593,7 @@ const ViewProfileTeacher = () => {
                       Diperbarui Pada
                     </label>
                     <div className="p-2 bg-gray-100 border border-gray-200 rounded-lg">
-                      {formatDate(formData.updated_at)}
+                      {formatDate(formData.updated_at ?? "")}
                     </div>
                   </div>
                 </div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useTrainerById } from "@/config/Api/useTrainers";
 
 const ViewProfileTrainer = () => {
-  const trainerId = localStorage.getItem("trainer_id") || "";
+  const trainerId = Number(localStorage.getItem("trainer_id")) || 0;
 
   const { data: trainer } = useTrainerById(trainerId);
 
