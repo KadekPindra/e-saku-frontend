@@ -84,8 +84,6 @@ interface CustomTooltipProps {
   label?: string;
 }
 
-
-
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
@@ -161,9 +159,7 @@ const ViewDashboard = () => {
 
   // State for data
   const [violationData, setViolationData] = useState<IViolation[]>([]);
-  const [, setAccomplishmentData] = useState<
-    IAccomplishments[]
-  >([]);
+  const [, setAccomplishmentData] = useState<IAccomplishments[]>([]);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardItem[]>([]);
   const [statsData, setStatsData] = useState({
     totalPoints: 0,
@@ -207,10 +203,9 @@ const ViewDashboard = () => {
   // Ambil data semua kelas
   const { data: accomplishmentsResponse } = useAccomplishments();
 
-
   const getGradeFromClassroom = (classroom: IClassroom | undefined): string => {
-    if (!classroom || !classroom.grade) return "-";
-    return classroom.grade;
+    if (!classroom || !classroom.grade.name) return "-";
+    return classroom.grade.name;
   };
 
   // Filter berdasarkan rentang waktu
@@ -268,7 +263,7 @@ const ViewDashboard = () => {
       const classCount: Record<string, number> = {};
       filteredViolations.forEach((v) => {
         const student = v.student as IStudent;
-        const className = student?.classroom?.name || "-";
+        const className = student?.classroom?.display_name || "-";
         classCount[className] = (classCount[className] || 0) + 1;
       });
 
@@ -534,7 +529,7 @@ const ViewDashboard = () => {
     return timeFiltered.filter((violation) => {
       const student = violation.student as IStudent;
       const rules = violation.rules_of_conduct as IRules;
-      const className = student?.classroom?.name || "-";
+      const className = student?.classroom?.display_name || "-";
 
       const searchLower = searchText.toLowerCase();
       return (
@@ -548,7 +543,10 @@ const ViewDashboard = () => {
   }, [violationData, overallTimeRange, searchText]);
 
   const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(filteredViolationData.length / parseInt(rowsPerPage)));
+    return Math.max(
+      1,
+      Math.ceil(filteredViolationData.length / parseInt(rowsPerPage))
+    );
   }, [filteredViolationData.length, rowsPerPage]);
 
   // Pagination
@@ -681,7 +679,9 @@ const ViewDashboard = () => {
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full md:w-auto">
                   <Select
                     value={activityType}
-                    onValueChange={(v: "all" | "violations" | "achievements") => setActivityType(v)}
+                    onValueChange={(v: "all" | "violations" | "achievements") =>
+                      setActivityType(v)
+                    }
                   >
                     <SelectTrigger className="border-green-500 focus:ring-green-400 w-full xs:w-auto xs:min-w-[140px] rounded-lg">
                       <SelectValue placeholder="Jenis Aktivitas" />
@@ -908,7 +908,9 @@ const ViewDashboard = () => {
               <div className="md:flex items-center space-y-2 md:space-y-0 gap-2">
                 <Select
                   value={overallTimeRange}
-                  onValueChange={(v: "daily" | "weekly" | "monthly" | "yearly" ) => setOverallTimeRange(v)}
+                  onValueChange={(
+                    v: "daily" | "weekly" | "monthly" | "yearly"
+                  ) => setOverallTimeRange(v)}
                 >
                   <SelectTrigger className="border-green-500 focus:ring-green-400 w-full xs:w-auto xs:min-w-[140px] rounded-lg">
                     <SelectValue placeholder="Rentang Waktu" />
@@ -987,7 +989,7 @@ const ViewDashboard = () => {
                         </Link>
                       </TableCell>
                       <TableCell className="text-center font-normal text-xs sm:text-sm hidden md:table-cell">
-                        {violation.student?.classroom?.name || "-"}
+                        {violation.student?.classroom?.display_name || "-"}
                       </TableCell>
                       <TableCell className="text-center font-normal text-xs sm:text-sm hidden lg:table-cell">
                         {violation.rules_of_conduct.name}
@@ -1028,88 +1030,73 @@ const ViewDashboard = () => {
             ) : (
               displayedViolationData.map((violation) => {
                 return (
-                    <Card key={violation.id} className="border rounded-lg">
-                        <CardContent className="p-4">
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    <Link
-                                        to={`/studentbio/${violation.student?.id}`}
-                                        className="text-green-500 font-medium transition-colors"
-                                    >
-                                        {violation.student?.name}
-                                    </Link>
-                                    <p className="text-xs text-gray-500">
-                                        NIS: {violation.student?.nis}
-                                    </p>
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                    #{violation.id}
-                                </Badge>
-                            </div>
+                  <Card key={violation.id} className="border rounded-lg">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <Link
+                            to={`/studentbio/${violation.student?.id}`}
+                            className="text-green-500 font-medium transition-colors"
+                          >
+                            {violation.student?.name}
+                          </Link>
+                          <p className="text-xs text-gray-500">
+                            NIS: {violation.student?.nis}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          #{violation.id}
+                        </Badge>
+                      </div>
 
-                            <div className="grid grid-cols-2 gap-2 mt-3">
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        Kelas
-                                    </p>
-                                    <p className="text-sm">
-                                        {violation.student?.classroom?.name ||
-                                            "-"}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        Pelanggaran
-                                    </p>
-                                    <p className="text-sm">
-                                        {violation.rules_of_conduct.name}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        Poin
-                                    </p>
-                                    <Badge
-                                        variant="outline"
-                                        className="text-xs bg-red-100 text-red-500 border-red-500"
-                                    >
-                                        {violation.points}
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500">
-                                        Total
-                                    </p>
-                                    <Badge
-                                        variant="secondary"
-                                        className={`text-xs ${
-                                            violation.student?.point_total !==
-                                                undefined &&
-                                            violation.student?.point_total <= 20
-                                                ? "bg-green-100 text-green-500 border-green-500"
-                                                : violation.student
-                                                      ?.point_total !==
-                                                      undefined &&
-                                                  violation.student
-                                                      ?.point_total >= 21 &&
-                                                  violation.student
-                                                      ?.point_total <= 60
-                                                ? "bg-yellow-100 text-yellow-500 border-yellow-500"
-                                                : violation.student
-                                                      ?.point_total !==
-                                                      undefined &&
-                                                  violation.student
-                                                      ?.point_total > 60
-                                                ? "bg-red-100 text-red-500 border-red-500"
-                                                : ""
-                                        }`}
-                                    >
-                                        {violation.student?.point_total}
-                                    </Badge>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <div>
+                          <p className="text-xs text-gray-500">Kelas</p>
+                          <p className="text-sm">
+                            {violation.student?.classroom?.display_name || "-"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Pelanggaran</p>
+                          <p className="text-sm">
+                            {violation.rules_of_conduct.name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Poin</p>
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-red-100 text-red-500 border-red-500"
+                          >
+                            {violation.points}
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Total</p>
+                          <Badge
+                            variant="secondary"
+                            className={`text-xs ${
+                              violation.student?.point_total !== undefined &&
+                              violation.student?.point_total <= 20
+                                ? "bg-green-100 text-green-500 border-green-500"
+                                : violation.student?.point_total !==
+                                    undefined &&
+                                  violation.student?.point_total >= 21 &&
+                                  violation.student?.point_total <= 60
+                                ? "bg-yellow-100 text-yellow-500 border-yellow-500"
+                                : violation.student?.point_total !==
+                                    undefined &&
+                                  violation.student?.point_total > 60
+                                ? "bg-red-100 text-red-500 border-red-500"
+                                : ""
+                            }`}
+                          >
+                            {violation.student?.point_total}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 );
               })
             )}
