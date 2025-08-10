@@ -43,7 +43,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       toast.success("Logout berhasil");
       navigate("/login", { replace: true });
     } catch (error) {
-      console.error(error)
+      console.error(error);
       toast.error("Logout gagal");
     }
   };
@@ -76,22 +76,17 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
     }
   }, [isMobile, isMobileScreen, closeSidebar]);
 
-  // Common items for all roles
-  const commonPlatformItems =
-    role === "student" ? [] : [{ label: "Dashboard", icon: Home, path: "/" }];
-
-  // Items rules untuk semua peran
-  const rulesItem = { label: "Rules", icon: DiamondMinusIcon, path: "/rules" };
-
   // Role-based menu items
   const rolePlatformItems: Record<string, any[]> = {
     teacher: [
+      { label: "Dashboard", icon: Home, path: "/" },
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
       { label: "Report", icon: MessageSquareWarning, path: "/report" },
     ],
     master: [
+      { label: "Dashboard", icon: Home, path: "/" },
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
@@ -122,19 +117,18 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
     ],
     trainer: [
       {
-        label: "Extracurricular",
-        icon: Users,
-        path: `/student/extra`,
-      }
-    ]
+        label: "Manage Extracurricular", // Menu baru
+        icon: FolderKanban,
+        path: "/manageextracurricular",
+      },
+    ],
   };
 
+  // Items rules untuk semua peran
+  const rulesItem = { label: "Rules", icon: DiamondMinusIcon, path: "/rules" };
+
   // Combine common items with role-specific items
-  const platformItems = [
-    ...commonPlatformItems,
-    rulesItem,
-    ...(rolePlatformItems[role] || []),
-  ];
+  const platformItems = [rulesItem, ...(rolePlatformItems[role] || [])];
 
   // Account items (common for all)
   const accountItems = [{ label: "Help", icon: CircleHelp, path: "/help" }];

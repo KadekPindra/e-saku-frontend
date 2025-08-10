@@ -33,9 +33,11 @@ export const useLogin = () => {
       } else if (user?.student_id) {
         localStorage.setItem("student_id", user.student_id);
         localStorage.setItem("user_type", "student");
+        if (user.role) localStorage.setItem("role", user.role);
       } else if (user?.trainer_id) {
         localStorage.setItem("trainer_id", user.trainer_id)
         localStorage.setItem("user_type", "trainer")
+        if (user.role) localStorage.setItem("role", user.role)
       }
 
       if (user?.teacher_id) {
