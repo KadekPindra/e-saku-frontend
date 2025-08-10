@@ -84,6 +84,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
       { label: "Report", icon: MessageSquareWarning, path: "/report" },
+      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
     ],
     master: [
       { label: "Dashboard", icon: Home, path: "/" },
@@ -91,6 +92,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
       { label: "Report", icon: MessageSquareWarning, path: "/report" },
+      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
       { label: "Manage Rules", icon: FolderKanban, path: "/managerules" },
       { label: "Manage Activity", icon: FolderKanban, path: "/manageactivity" },
       { label: "Manage Teacher", icon: FolderKanban, path: "/manageteacher" },
@@ -114,6 +116,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
         icon: Users,
         path: `/student/extra`,
       },
+      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" }
     ],
     trainer: [
       {
@@ -124,11 +127,8 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
     ],
   };
 
-  // Items rules untuk semua peran
-  const rulesItem = { label: "Rules", icon: DiamondMinusIcon, path: "/rules" };
-
   // Combine common items with role-specific items
-  const platformItems = [rulesItem, ...(rolePlatformItems[role] || [])];
+  const platformItems = [...(rolePlatformItems[role] || [])];
 
   // Account items (common for all)
   const accountItems = [{ label: "Help", icon: CircleHelp, path: "/help" }];
