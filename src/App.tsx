@@ -34,7 +34,7 @@ import StudentExtra from "./pages/StudentExtra";
 import ManageUser from "./pages/ManageUser";
 import ManageTeacher from "./pages/ManageTeacher";
 import ProfileTrainer from "./pages/ProfileTrainer";
-import ViewManageExtracurricular from "./views/Trainer/ViewManageExtracurricular";
+import ManageExtracurricular from "./views/Trainer/ViewManageExtracurricular";
 
 // import PrivacyPolicy from "./pages/PrivacyPolicy";
 
@@ -124,7 +124,7 @@ export function AppContent() {
           <Route path="/manageuser" element={<ManageUser />} />
           <Route path="/manageuser" element={<ManageUser />} />
           <Route path="/profiletrainer" element={<ProfileTrainer />} />
-          <Route path="/manageextracurricular" element={<ProfileTrainer />} />
+          <Route path="/manageextracurricular" element={<ManageExtracurricular />} />
           {/* <Route path="/privacypolicy" element={<PrivacyPolicy/>} /> */}
         </Route>
       </Route>
