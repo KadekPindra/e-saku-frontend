@@ -31,14 +31,14 @@ export interface IExtracurricularHistory {
     class_id: number;
     classroom: {
       id: number;
-      name: string;
+      display_name: string;
       total_student: number;
     };
   };
   extracurricular: {
     id: number;
     name: string;
-    trainer: string;
+    trainer_id: string;
   };
 }
 

@@ -514,7 +514,7 @@ const ViewStudentByClass: React.FC = () => {
         </span>
       </Button>
       <ClassHeader
-        className={classroom?.name || ""}
+        className={classroom?.display_name || ""}
         teacherName={teacherName}
         showBackButton={userType === "student"}
       />
@@ -783,7 +783,7 @@ const ViewStudentByClass: React.FC = () => {
             >
               <DialogHeader>
                 <DialogTitle className="text-base sm:text-lg lg:text-xl leading-tight">
-                  Impor data siswa untuk {classroom?.name}
+                  Impor data siswa untuk {classroom?.display_name}
                 </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm leading-relaxed">
                   Unggah file Excel (.xls atau .xlsx) yang berisi data siswa untuk kelas ini
