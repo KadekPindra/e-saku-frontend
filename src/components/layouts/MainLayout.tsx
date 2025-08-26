@@ -29,7 +29,7 @@ const MainLayout = ({
         }`}
       >
         <Navbar onToggleNotification={() => {}} title={title} />
-        <div className="p-6 md:pt-24 flex-1">{children}</div>
+        <div className="p-6 pt-24 flex-1">{children}</div>
       </div>
     </div>
   );
