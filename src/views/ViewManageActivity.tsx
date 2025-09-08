@@ -302,13 +302,14 @@ const ViewManageActivity = () => {
     const handleTabChange = (tab: "extracurricular" | "students") => {
         setActiveTab(tab);
         setCurrentPage(1);
-
+    
         const tabRef =
             tab === "extracurricular" ? extracurricularTabRef : studentsTabRef;
+    
         if (tabRef.current && tabsRef.current) {
             const tabRect = tabRef.current.getBoundingClientRect();
             const containerRect = tabsRef.current.getBoundingClientRect();
-
+    
             setIndicatorStyle({
                 left: tabRect.left - containerRect.left,
                 width: tabRect.width,
@@ -366,34 +367,25 @@ const ViewManageActivity = () => {
 
     useEffect(() => {
         const updateIndicator = () => {
-            const initialTabElement = extracurricularTabRef.current;
-
-            if (initialTabElement && tabsRef.current) {
-                const tabRect = initialTabElement.getBoundingClientRect();
+            const activeTabElement =
+                activeTab === "extracurricular"
+                    ? extracurricularTabRef.current
+                    : studentsTabRef.current;
+    
+            if (activeTabElement && tabsRef.current) {
+                const tabRect = activeTabElement.getBoundingClientRect();
                 const navRect = tabsRef.current.getBoundingClientRect();
-
-                // Only update if we get valid measurements
-                if (tabRect.width > 0 && navRect.width > 0) {
-                    setIndicatorStyle({
-                        left: tabRect.left - navRect.left,
-                        width: tabRect.width,
-                    });
-                }
+    
+                setIndicatorStyle({
+                    left: tabRect.left - navRect.left,
+                    width: tabRect.width,
+                });
             }
         };
-
-        // Try multiple times with increasing delays to ensure DOM is ready
-        const timers = [
-            setTimeout(updateIndicator, 10),
-            setTimeout(updateIndicator, 50),
-            setTimeout(updateIndicator, 100),
-            setTimeout(updateIndicator, 200),
-        ];
-
-        return () => {
-            timers.forEach((timer) => clearTimeout(timer));
-        };
-    }, [extracurricularsLoading, activeTab]);
+    
+        // Update immediately after the active tab changes
+        updateIndicator();
+    }, [activeTab]);
 
     const handleRowsPerPageChange = (value: string) => {
         setRowsPerPage(value);
