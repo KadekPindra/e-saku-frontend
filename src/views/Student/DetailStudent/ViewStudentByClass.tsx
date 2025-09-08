@@ -166,12 +166,12 @@ const ViewStudentByClass: React.FC = () => {
     }
   }, []);
 
-    const statusTranslations: Record<string, string> = {
-      active: "Aktif",
-      rest: "Istirahat",
-      transfered: "Dipindahkan",
-      resign: "Mengundurkan Diri",
-    };
+  const statusTranslations: Record<string, string> = {
+    active: "Aktif",
+    rest: "Istirahat",
+    transfered: "Dipindahkan",
+    resign: "Mengundurkan Diri",
+  };
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -609,11 +609,8 @@ const ViewStudentByClass: React.FC = () => {
                   <input
                     type="text"
                     id="studentClass"
+                    value={classroom?.display_name || ""}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors duration-200 text-xs sm:text-sm md:text-base"
-                    value={
-                      classes?.find((c) => c.id === newStudent.class_id)
-                        ?.name || "Pilih kelas terlebih dahulu"
-                    }
                     disabled
                   />
                 </div>
@@ -683,7 +680,8 @@ const ViewStudentByClass: React.FC = () => {
                     <li className="flex items-start">
                       <span className="mr-1">•</span>
                       <span>
-                        Nama siswa harus diisi lengkap sesuai KTP atau Akta Kelahiran
+                        Nama siswa harus diisi lengkap sesuai KTP atau Akta
+                        Kelahiran
                         <p className="font-medium">
                           (contoh: Ahmad Rizki Maulana)
                         </p>
@@ -695,9 +693,7 @@ const ViewStudentByClass: React.FC = () => {
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1">•</span>
-                      <span>
-                        Guru akan otomatis ditugaskan sesuai kelas
-                      </span>
+                      <span>Guru akan otomatis ditugaskan sesuai kelas</span>
                     </li>
                     <li className="flex items-start">
                       <span className="mr-1">•</span>
@@ -786,7 +782,8 @@ const ViewStudentByClass: React.FC = () => {
                   Impor data siswa untuk {classroom?.display_name}
                 </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm leading-relaxed">
-                  Unggah file Excel (.xls atau .xlsx) yang berisi data siswa untuk kelas ini
+                  Unggah file Excel (.xls atau .xlsx) yang berisi data siswa
+                  untuk kelas ini
                 </DialogDescription>
               </DialogHeader>
 
@@ -1154,7 +1151,8 @@ const ViewStudentByClass: React.FC = () => {
                               }
                             )}
                           >
-                            {statusTranslations[student.status] || student.status}
+                            {statusTranslations[student.status] ||
+                              student.status}
                           </Badge>
                         </TableCell>
 
