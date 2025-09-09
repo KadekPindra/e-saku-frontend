@@ -470,7 +470,7 @@ const handleSelectExtracurricular = (id: number) => {
         {/* MOBILE */}
         <div className="md:hidden flex flex-col gap-2">
           {paginatedData.length > 0 ? (
-            paginatedData.map((item, index) => {
+            paginatedData.map((item ) => {
               const isSelected = selectedExtracurriculars.includes(
                 item.id!
               );
