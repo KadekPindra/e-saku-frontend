@@ -1,4 +1,4 @@
-// ViewHistory Component - Updated to fetch accomplishment details
+// ViewHistory Component - Menampilkan SEMUA data tanpa filter teacher
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,12 +33,12 @@ import { DatePicker } from "@/components/shared/component/DatePicker";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useViolationDelete,
-  useViolationsByTeacherId,
+  useViolations, // getAll violations
 } from "@/config/Api/useViolation";
 import { IViolation } from "@/config/Models/Violation";
 import {
   useAccomplishmentDelete,
-  useAccomplishmentsByTeacherId,
+  useAccomplishments, // getAll accomplishments
 } from "@/config/Api/useAccomplishments";
 import { IAccomplishments } from "@/config/Models/Accomplishments";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -89,9 +89,6 @@ const ViewHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchText, setSearchText] = useState("");
 
-  // Get the logged-in teacher's ID from localStorage
-  const teacherId = localStorage.getItem("teacher_id") || "";
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{
     id: number;
@@ -102,9 +99,9 @@ const ViewHistory = () => {
   const deleteViolation = useViolationDelete();
   const deleteAccomplishment = useAccomplishmentDelete();
 
-  const { refetch: refetchViolations } = useViolationsByTeacherId(teacherId);
-  const { refetch: refetchAccomplishments } =
-    useAccomplishmentsByTeacherId(teacherId);
+  // Refetch semua data (tanpa filter teacher)
+  const { refetch: refetchViolations } = useViolations();
+  const { refetch: refetchAccomplishments } = useAccomplishments();
 
   const exportHistory = useStudentHistoryExport();
 
@@ -135,22 +132,22 @@ const ViewHistory = () => {
     }, {} as Record<string, string>);
   }, [accomplishmentLevels]);
 
-  // Fetch data hooks
+  // Fetch ALL data hooks (menggunakan getAll TANPA filter teacher)
   const {
-    data: violationsData,
+    data: violationsData = [],
     isLoading: isLoadingViolations,
     isError: isErrorViolations,
     error: errorViolations,
-  } = useViolationsByTeacherId(teacherId);
+  } = useViolations(); // SEMUA violations
 
   const {
-    data: accomplishmentsData,
+    data: accomplishmentsData = [],
     isLoading: isLoadingAccomplishments,
     isError: isErrorAccomplishments,
     error: errorAccomplishments,
-  } = useAccomplishmentsByTeacherId(teacherId);
+  } = useAccomplishments(); // SEMUA accomplishments
 
-  // Enhance accomplishments data with details
+  // Enhance accomplishments data with details - langsung dari semua data
   const enhancedAccomplishments = useMemo<EnhancedAccomplishment[]>(() => {
     if (!accomplishmentsData || !typeLookup || !rankLookup || !levelLookup)
       return [];
@@ -211,19 +208,17 @@ const ViewHistory = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
+
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
-    // Set timeout baru
     searchTimeoutRef.current = setTimeout(() => {
       setSearchText(value);
       setCurrentPage(1);
     }, 300);
   };
 
-  // Bersihkan timeout saat komponen unmount
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -261,10 +256,12 @@ const ViewHistory = () => {
   };
 
   const isFilterActive = selectedDate || classType || searchText;
+
+  // Filter data berdasarkan search text - langsung dari SEMUA data
   const filteredData = useMemo(() => {
     if (selectedHistory === "violationhistory") {
       return (
-        violationsData?.filter(
+        violationsData.filter(
           (violation) =>
             searchText === "" ||
             violation.student?.name
@@ -280,7 +277,7 @@ const ViewHistory = () => {
       );
     } else {
       return (
-        enhancedAccomplishments?.filter(
+        enhancedAccomplishments.filter(
           (accomplishment) =>
             searchText === "" ||
             accomplishment.student?.name
@@ -303,11 +300,10 @@ const ViewHistory = () => {
     }
   }, [searchText, violationsData, enhancedAccomplishments, selectedHistory]);
 
-  // Apply date filter with proper timezone handling
+  // Apply date filter
   const filteredDataWithDate = useMemo(() => {
     if (!selectedDate) return filteredData;
 
-    // Format selected date to YYYY-MM-DD in local time
     const dateStr = formatDate(selectedDate);
 
     if (selectedHistory === "violationhistory") {
@@ -338,14 +334,14 @@ const ViewHistory = () => {
   const endIndex = startIndex + parseInt(rowsPerPage);
   const displayedData = finalFilteredData.slice(startIndex, endIndex);
 
-  // Reset page if current page is beyond total pages
+  // Reset page jika current page melebihi total pages
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(1);
     }
   }, [totalPages, currentPage]);
 
-  // Determine loading and error states
+  // Tentukan loading dan error states
   const isLoading =
     selectedHistory === "violationhistory"
       ? isLoadingViolations
@@ -384,7 +380,7 @@ const ViewHistory = () => {
           </h1>
         </div>
         <p className="text-gray-600 max-w-3xl text-sm sm:text-base">
-          Lihat dan kelola riwayat aktivitas siswa
+          Lihat dan kelola semua riwayat aktivitas siswa
         </p>
       </div>
 
@@ -428,8 +424,8 @@ const ViewHistory = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
               {selectedHistory === "violationhistory"
-                ? "Histori Pelanggaran"
-                : "Histori Prestasi"}
+                ? "Semua Data Pelanggaran"
+                : "Semua Data Prestasi"}
             </CardTitle>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -454,8 +450,8 @@ const ViewHistory = () => {
                   onChange={handleInputChange}
                   placeholder={
                     selectedHistory === "violationhistory"
-                      ? "Cari data pelanggaran..."
-                      : "Cari data prestasi..."
+                      ? "Cari semua data pelanggaran..."
+                      : "Cari semua data prestasi..."
                   }
                   className="pl-9 bg-white border-gray-200 w-full rounded-lg"
                 />
@@ -477,6 +473,9 @@ const ViewHistory = () => {
                 </TableHead>
                 <TableHead className="text-center font-medium text-black">
                   Nama
+                </TableHead>
+                <TableHead className="text-center font-medium text-black">
+                  Kelas
                 </TableHead>
 
                 {selectedHistory === "violationhistory" ? (
@@ -512,7 +511,6 @@ const ViewHistory = () => {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                // Skeleton loading rows
                 Array.from({ length: 5 }).map((_, rowIndex) => (
                   <TableRow key={rowIndex}>
                     <TableCell className="text-center px-6">
@@ -523,6 +521,9 @@ const ViewHistory = () => {
                     </TableCell>
                     <TableCell className="text-center">
                       <Skeleton className="h-4 w-32 mx-auto" />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Skeleton className="h-4 w-20 mx-auto" />
                     </TableCell>
 
                     {selectedHistory === "violationhistory" ? (
@@ -560,7 +561,6 @@ const ViewHistory = () => {
                   </TableRow>
                 ))
               ) : (
-                // Actual data rows
                 <>
                   {displayedData.map((item, index) => (
                     <TableRow
@@ -580,6 +580,9 @@ const ViewHistory = () => {
                         >
                           {item.student?.name}
                         </Link>
+                      </TableCell>
+                      <TableCell className="text-center font-normal">
+                        {item.student?.classroom?.display_name || "-"}
                       </TableCell>
 
                       {selectedHistory === "violationhistory" ? (
@@ -646,7 +649,7 @@ const ViewHistory = () => {
                   {displayedData.length === 0 && (
                     <TableRow>
                       <TableCell
-                        colSpan={selectedHistory === "violationhistory" ? 7 : 8}
+                        colSpan={selectedHistory === "violationhistory" ? 8 : 9}
                         className="text-center py-8 text-gray-500"
                       >
                         Tidak ada data yang sesuai dengan pencarian
@@ -662,7 +665,6 @@ const ViewHistory = () => {
         {/* Mobile & Tablet Card List */}
         <div className="md:hidden space-y-3 p-4">
           {isLoading ? (
-            // Skeleton loading for mobile/tablet
             Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="space-y-3">
@@ -681,7 +683,6 @@ const ViewHistory = () => {
               </div>
             ))
           ) : (
-            // Actual data for mobile/tablet
             <>
               {displayedData.map((item, index) => (
                 <div
@@ -705,6 +706,9 @@ const ViewHistory = () => {
                         >
                           {item.student?.name}
                         </Link>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Kelas: {item.student?.classroom?.display_name || "-"}
                       </div>
                     </div>
                     <div className="flex gap-1">
