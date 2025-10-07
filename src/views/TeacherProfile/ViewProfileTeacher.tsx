@@ -600,11 +600,11 @@ const ViewProfileTeacher = () => {
 
                 <div className="flex flex-col sm:flex-row justify-end items-center mt-6 gap-3">
                   {!isEditing && !isEditingPassword ? (
-                    <div className="flex flex-wrap gap-3 justify-center">
+                    <div className="flex flex-wrap lg:flex-nowrap gap-3 justify-center">
                       <Button
                         onClick={toggleEditMode}
                         variant="default"
-                        className="hover:bg-[#009616] hover:text-white transition-all"
+                        className="hover:bg-[#009616] w-full sm:w-fit hover:text-white transition-all"
                       >
                         <Edit size={16} className="mr-2" />
                         Edit Profil
@@ -612,7 +612,7 @@ const ViewProfileTeacher = () => {
                       <Button
                         onClick={() => setIsEditingPassword(true)}
                         variant="default"
-                        className="hover:bg-[#009616] hover:text-white transition-all"
+                        className="hover:bg-[#009616] w-full sm:w-fit hover:text-white transition-all"
                       >
                         <Lock size={16} className="mr-2" />
                         Perbarui Password

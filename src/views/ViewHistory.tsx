@@ -387,15 +387,15 @@ const ViewHistory = () => {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="w-full flex justify-between sm:w-[180px]">
           <div className="flex gap-4 w-full">
-            <div className="bg-white rounded-md">
+          <div className="relative w-48 bg-white rounded-md">
               <Select
                 onValueChange={handleHistoryChange}
                 value={selectedHistory}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-44 pr-auto">
                   <SelectValue placeholder="Pilih Histori" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-44">
                   <SelectGroup>
                     <SelectItem value="violationhistory">
                       Histori Pelanggaran

@@ -203,6 +203,22 @@ const ViewManageTeacher: React.FC = () => {
     }
   }, [error]);
 
+  useEffect(() => {
+    // Set the indicator position immediately when the page loads (first tab is "teachers")
+    const initialTabElement =
+      activeTab === "teachers" ? teachersTabRef.current : classesTabRef.current;
+  
+    if (initialTabElement && tabsRef.current) {
+      const tabRect = initialTabElement.getBoundingClientRect();
+      const navRect = tabsRef.current.getBoundingClientRect();
+  
+      setIndicatorStyle({
+        left: tabRect.left - navRect.left,
+        width: tabRect.width,
+      });
+    }
+  }, [activeTab]);
+
   const handleTabChange = (tab: "teachers" | "classes") => {
     setActiveTab(tab);
     // Don't reset search or pagination when switching tabs

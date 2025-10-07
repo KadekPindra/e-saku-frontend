@@ -380,7 +380,8 @@ const handleSelectExtracurricular = (id: number) => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto pt-3 relative">
+        {/* DESKTOP */}
+        <div className="hidden md:block overflow-x-auto pt-3 relative">
           <Table>
             <TableHeader className="bg-gray-50">
               <TableRow className="hover:bg-gray-50">
@@ -436,7 +437,7 @@ const handleSelectExtracurricular = (id: number) => {
                           Aktif
                         </span>
                       </TableCell>
-                      <TableCell className="text-center px-4 py-3">
+                      <TableCell className="text-center px-4 py-3 mr-4">
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={() =>
@@ -466,8 +467,65 @@ const handleSelectExtracurricular = (id: number) => {
           </Table>
         </div>
 
+        {/* MOBILE */}
+        <div className="md:hidden flex flex-col gap-2">
+          {paginatedData.length > 0 ? (
+            paginatedData.map((item ) => {
+              const isSelected = selectedExtracurriculars.includes(
+                item.id!
+              );
+              const isDisabled = remainingSlots <= 0 && !isSelected;
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white p-2 px-4">
+                  <div className="p-4 flex gap-4 border rounded-xl shadow-sm w-full">
+                    <div className="w-[80%]">
+                      <div className="text-xl font-bold">{item.name}</div>
+                      <div>{item.trainer?.name || '-'}</div>
+                      <div className="flex justify-between items-center mt-6">
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-1 bg-gray-200 rounded-xl text-xs font-semibold">
+                            {item.students_count || 0}
+                          </span>
+                          <span className="text-sm">Peserta</span>
+                        </div>
+                        <div className="px-3 py-1 bg-green-400 rounded-xl text-xs font-semibold text-white">Aktif</div>
+                      </div>
+                    </div>
+                    <div className="w-[20%] flex justify-center items-center">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() =>
+                          handleSelectExtracurricular(item.id!)
+                        }
+                        className="h-6 w-6"
+                        disabled={isDisabled}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-12 px-4">
+                <div className="flex flex-col items-center gap-2 text-gray-500">
+                  <AlertCircle className="h-8 w-8 text-gray-300" />
+                  <p>
+                    {remainingSlots <= 0
+                      ? "Anda sudah mendaftar di maksimal ekstrakurikuler"
+                      : "Tidak ada ekstrakurikuler aktif ditemukan"}
+                  </p>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </div>
+
         {/* Pagination and Submit */}
-        <div className="px-4 sm:px-6 pt-4 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center border-t gap-4">
+        <div className="mt-3 px-4 sm:px-6 pt-4 pb-4 flex flex-col sm:mt-0 sm:flex-row sm:justify-between sm:items-center border-t gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <div className="text-sm text-gray-500 text-center sm:text-left">
               Menampilkan {startIndex + 1} -{" "}

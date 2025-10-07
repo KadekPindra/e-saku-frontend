@@ -777,16 +777,16 @@ const performSave = async () => {
       <Card className="rounded-xl overflow-hidden shadow-sm border-gray-200">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-6 pt-4 pb-4 border-b-2 border-green-500">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
-              <TabsTrigger value="rules" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
+            <TabsList className="grid h-fit w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger value="rules" className="flex items-center gap-2 text-wrap">
+                <FileText className="h-6 w-6 md:h-4 md:w-4" />
                 Manajemen Peraturan
               </TabsTrigger>
               <TabsTrigger
                 value="achievements"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-wrap"
               >
-                <Trophy className="h-4 w-4" />
+                <Trophy className="h-6 w-6 md:h-4 md:w-4" />
                 Manajemen Prestasi
               </TabsTrigger>
             </TabsList>
@@ -1007,10 +1007,10 @@ const performSave = async () => {
               className="w-full"
             >
               <div className="px-6 pt-4 pb-4 border-b border-gray-200">
-                <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-                  <TabsTrigger value="types">Jenis Prestasi</TabsTrigger>
-                  <TabsTrigger value="ranks">Peringkat Prestasi</TabsTrigger>
-                  <TabsTrigger value="levels">Tingkatan Prestasi</TabsTrigger>
+                <TabsList className="grid w-full h-fit grid-cols-3 bg-gray-100">
+                  <TabsTrigger value="types" className="text-wrap">Jenis Prestasi</TabsTrigger>
+                  <TabsTrigger value="ranks" className="text-wrap">Peringkat Prestasi</TabsTrigger>
+                  <TabsTrigger value="levels" className="text-wrap">Tingkatan Prestasi</TabsTrigger>
                 </TabsList>
               </div>
 
