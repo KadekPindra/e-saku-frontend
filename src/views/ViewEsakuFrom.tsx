@@ -19,7 +19,6 @@ import {
   ArrowRight,
   RefreshCw,
   Info,
-  Send,
   Globe,
   PenTool,
   Paperclip,
@@ -107,8 +106,6 @@ const ESakuForm: React.FC = () => {
     "bg-green-600 hover:bg-green-700 text-white cursor-pointer flex items-center gap-1.5";
   const btnSecondaryClass =
     "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 flex items-center gap-1.5";
-  const btnDarkClass =
-    "bg-gray-900 hover:bg-gray-800 cursor-pointer text-white flex items-center gap-1.5";
   const [isLoading, setIsLoading] = useState(true);
   const [inputType, setInputType] = useState<InputTypeOptions>("violation");
   const [classType, setClassType] = useState<string>("");
@@ -148,11 +145,11 @@ const ESakuForm: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [, setPhotoUrl] = useState<string | undefined>(undefined);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
-  const [isClassTaughtByTeacher, setIsClassTaughtByTeacher] = useState<
-    boolean | null
-  >(null);
+  // const [isClassTaughtByTeacher, setIsClassTaughtByTeacher] = useState<
+  //   boolean | null
+  // >(null);
   const [showOnlyTeacherClass, setShowOnlyTeacherClass] =
-    useState<boolean>(true);
+    useState<boolean>(false);
   const [violations, setViolations] = useState<
     { id: string; points: number }[]
   >([]);
@@ -977,9 +974,9 @@ const ESakuForm: React.FC = () => {
   };
 
   const filteredClassrooms = classrooms?.filter((classroom) => {
-    if (inputType === "achievement") {
-      return classroom.teacher_id === teacherId;
-    }
+    // if (inputType === "achievement") {
+    //   return classroom.teacher_id === teacherId;
+    // }
     return showOnlyTeacherClass ? classroom.teacher_id === teacherId : true;
   });
 
@@ -1130,10 +1127,10 @@ const ESakuForm: React.FC = () => {
                             setSelectedClassId(selectedClass?.id || null);
                             setStudentName("");
 
-                            const teacherIdNum = Number(teacherId);
-                            setIsClassTaughtByTeacher(
-                              selectedClass?.teacher_id === teacherIdNum
-                            );
+                            // const teacherIdNum = Number(teacherId);
+                            // setIsClassTaughtByTeacher(
+                            //   selectedClass?.teacher_id === teacherIdNum
+                            // );
                           }}
                         >
                           <SelectTrigger
@@ -1155,8 +1152,8 @@ const ESakuForm: React.FC = () => {
                               )
                             )}
                           </SelectContent>
-                          {inputType === "violation" && (
-                            <div className="flex items-center gap-2 mt-2">
+                          {/* {inputType === "violation" && ( */}
+                            <div className="hidden items-center gap-2 mt-2">
                               <Checkbox
                                 id="filter-my-classes"
                                 checked={showOnlyTeacherClass}
@@ -1172,7 +1169,7 @@ const ESakuForm: React.FC = () => {
                                 Tampilkan hanya kelas yang diampu
                               </label>
                             </div>
-                          )}
+                          {/* )} */}
                         </Select>
                       )}
                     </FormFieldGroup>
@@ -1826,7 +1823,7 @@ const ESakuForm: React.FC = () => {
             </Button>
 
             <div className="flex gap-3">
-              {inputType === "violation" && !isEditMode && (
+              {/* {inputType === "violation" && !isEditMode && (
                 <Button
                   type="button"
                   className={btnDarkClass}
@@ -1840,7 +1837,7 @@ const ESakuForm: React.FC = () => {
                   <Send className="h-4 w-4" />
                   Kirim sebagai Laporan
                 </Button>
-              )}
+              )} */}
 
               <LoadingSpinnerButton
                 isLoading={isSubmitting}
@@ -1851,10 +1848,7 @@ const ESakuForm: React.FC = () => {
                   isSubmitting ||
                   (inputType === "violation" &&
                     !isEditMode &&
-                    violations.length === 0) ||
-                  (inputType === "violation" &&
-                    !isEditMode &&
-                    isClassTaughtByTeacher === false) // Tambahkan kondisi ini
+                    violations.length === 0)  // Tambahkan kondisi ini
                 }
               >
                 {isEditMode ? "Perbarui Data" : "Simpan"}
