@@ -28,17 +28,15 @@ import {
   Trash2,
   UploadIcon,
   X,
+  Filter,
 } from "lucide-react";
 import { DatePicker } from "@/components/shared/component/DatePicker";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useViolationDelete,
-  useViolations, // getAll violations
-} from "@/config/Api/useViolation";
+import { useViolationDelete, useViolations } from "@/config/Api/useViolation";
 import { IViolation } from "@/config/Models/Violation";
 import {
   useAccomplishmentDelete,
-  useAccomplishments, // getAll accomplishments
+  useAccomplishments,
 } from "@/config/Api/useAccomplishments";
 import { IAccomplishments } from "@/config/Models/Accomplishments";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,6 +47,7 @@ import { useStudentHistoryExport } from "@/config/Api/useStudent";
 import { useAccomplishmentsType } from "@/config/Api/useAccomplismentsType";
 import { useAccomplishmentsRanks } from "@/config/Api/useAccomplishmentsRanks";
 import { useAccomplishmentsLevel } from "@/config/Api/useAccomplishmentsLevel";
+import { useClassroom } from "@/config/Api/useClasroom";
 
 // Helper function to format date as YYYY-MM-DD in local time
 const formatDate = (date: Date) => {
@@ -68,20 +67,30 @@ const formatDisplayDate = (dateString: string) => {
   });
 };
 
+// Helper to get month from date string (YYYY-MM format)
+const getMonthFromDate = (dateString: string) => {
+  return dateString.substring(0, 7); // Returns "YYYY-MM"
+};
+
 interface EnhancedAccomplishment extends IAccomplishments {
   typeName: string;
   rankName: string;
   levelName: string;
 }
 
+// Constants for filter values
+const ALL_CLASSES = "all";
+const ALL_MONTHS = "all";
+
 const ViewHistory = () => {
   const [selectedHistory, setSelectedHistory] = useState<
     "violationhistory" | "accomplishmenthistory"
   >("violationhistory");
-  const [classType, setClassType] = useState<string>("");
-  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [selectedClassId, setSelectedClassId] = useState<string>(ALL_CLASSES);
+  const [selectedMonth, setSelectedMonth] = useState<string>(ALL_MONTHS);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isModalExportOpen, setIsModalExportOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false); // State untuk menampilkan/sembunyikan filter
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Table states
@@ -109,6 +118,9 @@ const ViewHistory = () => {
   const { data: accomplishmentTypes } = useAccomplishmentsType();
   const { data: accomplishmentRanks } = useAccomplishmentsRanks();
   const { data: accomplishmentLevels } = useAccomplishmentsLevel();
+
+  // Fetch classrooms data
+  const { data: classrooms } = useClassroom();
 
   // Create lookup objects for accomplishment details
   const typeLookup = useMemo(() => {
@@ -138,16 +150,16 @@ const ViewHistory = () => {
     isLoading: isLoadingViolations,
     isError: isErrorViolations,
     error: errorViolations,
-  } = useViolations(); // SEMUA violations
+  } = useViolations();
 
   const {
     data: accomplishmentsData = [],
     isLoading: isLoadingAccomplishments,
     isError: isErrorAccomplishments,
     error: errorAccomplishments,
-  } = useAccomplishments(); // SEMUA accomplishments
+  } = useAccomplishments();
 
-  // Enhance accomplishments data with details - langsung dari semua data
+  // Enhance accomplishments data with details
   const enhancedAccomplishments = useMemo<EnhancedAccomplishment[]>(() => {
     if (!accomplishmentsData || !typeLookup || !rankLookup || !levelLookup)
       return [];
@@ -169,6 +181,16 @@ const ViewHistory = () => {
 
   const handleDateChange = (date: Date | undefined) => {
     setSelectedDate(date || null);
+    setCurrentPage(1);
+  };
+
+  const handleClassChange = (classId: string) => {
+    setSelectedClassId(classId);
+    setCurrentPage(1);
+  };
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
     setCurrentPage(1);
   };
 
@@ -249,15 +271,44 @@ const ViewHistory = () => {
 
   const clearAllFilters = () => {
     setSelectedDate(null);
-    setClassType("");
-    setSelectedClassId(null);
+    setSelectedClassId(ALL_CLASSES);
+    setSelectedMonth(ALL_MONTHS);
     setSearchText("");
     setCurrentPage(1);
   };
 
-  const isFilterActive = selectedDate || classType || searchText;
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
 
-  // Filter data berdasarkan search text - langsung dari SEMUA data
+  const isFilterActive =
+    selectedDate ||
+    selectedClassId !== ALL_CLASSES ||
+    selectedMonth !== ALL_MONTHS ||
+    searchText;
+
+  // Generate bulan options dari data yang ada
+  const monthOptions = useMemo(() => {
+    const months = new Set<string>();
+
+    if (selectedHistory === "violationhistory") {
+      violationsData.forEach((violation) => {
+        if (violation.violation_date) {
+          months.add(getMonthFromDate(violation.violation_date));
+        }
+      });
+    } else {
+      enhancedAccomplishments.forEach((accomplishment) => {
+        if (accomplishment.accomplishment_date) {
+          months.add(getMonthFromDate(accomplishment.accomplishment_date));
+        }
+      });
+    }
+
+    return Array.from(months).sort().reverse();
+  }, [violationsData, enhancedAccomplishments, selectedHistory]);
+
+  // Filter data berdasarkan search text
   const filteredData = useMemo(() => {
     if (selectedHistory === "violationhistory") {
       return (
@@ -317,14 +368,30 @@ const ViewHistory = () => {
     }
   }, [filteredData, selectedDate, selectedHistory]);
 
+  // Apply month filter
+  const filteredDataWithMonth = useMemo(() => {
+    if (selectedMonth === ALL_MONTHS) return filteredDataWithDate;
+
+    if (selectedHistory === "violationhistory") {
+      return filteredDataWithDate.filter((violation) =>
+        violation.violation_date?.startsWith(selectedMonth)
+      );
+    } else {
+      return filteredDataWithDate.filter((accomplishment) =>
+        accomplishment.accomplishment_date?.startsWith(selectedMonth)
+      );
+    }
+  }, [filteredDataWithDate, selectedMonth, selectedHistory]);
+
   // Apply class filter
   const finalFilteredData = useMemo(() => {
-    if (!selectedClassId) return filteredDataWithDate;
+    if (selectedClassId === ALL_CLASSES) return filteredDataWithMonth;
 
-    return filteredDataWithDate.filter(
-      (item) => item.student?.classroom?.id === selectedClassId
+    const classIdNum = parseInt(selectedClassId);
+    return filteredDataWithMonth.filter(
+      (item) => item.student?.classroom?.id === classIdNum
     );
-  }, [filteredDataWithDate, selectedClassId]);
+  }, [filteredDataWithMonth, selectedClassId]);
 
   // Pagination
   const totalPages = Math.ceil(
@@ -387,7 +454,7 @@ const ViewHistory = () => {
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="w-full flex justify-between sm:w-[180px]">
           <div className="flex gap-4 w-full">
-          <div className="relative w-48 bg-white rounded-md">
+            <div className="relative w-48 bg-white rounded-md">
               <Select
                 onValueChange={handleHistoryChange}
                 value={selectedHistory}
@@ -429,7 +496,25 @@ const ViewHistory = () => {
             </CardTitle>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                {/* Tombol Filter */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleFilters}
+                  className={`h-8 w-full sm:w-auto ${
+                    isFilterActive
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : "text-gray-600 hover:text-gray-800"
+                  }`}
+                >
+                  <Filter className="h-3 w-3 mr-1" />
+                  Filter
+                  {isFilterActive && (
+                    <span className="ml-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                  )}
+                </Button>
+
                 {isFilterActive && (
                   <Button
                     variant="outline"
@@ -441,7 +526,6 @@ const ViewHistory = () => {
                     Hapus Filter
                   </Button>
                 )}
-                <DatePicker value={selectedDate} onChange={handleDateChange} />
               </div>
 
               <div className="relative w-full sm:w-72">
@@ -458,6 +542,83 @@ const ViewHistory = () => {
               </div>
             </div>
           </div>
+
+          {/* Area Filter yang bisa ditampilkan/sembunyikan */}
+          {showFilters && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Filter Tanggal */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Filter Tanggal
+                  </label>
+                  <DatePicker
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                  />
+                </div>
+
+                {/* Filter Kelas */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Filter Kelas
+                  </label>
+                  <Select
+                    value={selectedClassId}
+                    onValueChange={handleClassChange}
+                  >
+                    <SelectTrigger className="w-full border-gray-200 focus:ring-green-400 rounded-lg">
+                      <SelectValue placeholder="Pilih Kelas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_CLASSES}>Semua Kelas</SelectItem>
+                      {classrooms?.map((classroom) => (
+                        <SelectItem
+                          key={classroom.id}
+                          value={classroom.id.toString()}
+                        >
+                          {classroom.display_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Filter Bulan */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Filter Bulan
+                  </label>
+                  <Select
+                    value={selectedMonth}
+                    onValueChange={handleMonthChange}
+                  >
+                    <SelectTrigger className="w-full border-gray-200 focus:ring-green-400 rounded-lg">
+                      <SelectValue placeholder="Pilih Bulan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_MONTHS}>Semua Bulan</SelectItem>
+                      {monthOptions.map((month) => {
+                        const [year, monthNum] = month.split("-");
+                        const monthName = new Date(
+                          parseInt(year),
+                          parseInt(monthNum) - 1
+                        ).toLocaleDateString("id-ID", {
+                          month: "long",
+                          year: "numeric",
+                        });
+                        return (
+                          <SelectItem key={month} value={month}>
+                            {monthName}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Desktop Table */}

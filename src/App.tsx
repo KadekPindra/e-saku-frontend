@@ -27,7 +27,6 @@ import TeacherProfile from "./pages/TeacherProfile";
 import Rules from "./pages/Rules";
 import ManageRules from "./pages/ManageRules";
 import ManageActivity from "./pages/ManageActivity";
-import Report from "./pages/Report";
 import { Toaster } from "react-hot-toast";
 import StudentProfile from "./pages/ProfileStudent";
 import StudentExtra from "./pages/StudentExtra";
@@ -55,7 +54,6 @@ const LayoutWrapper = () => {
     // settings: "Settings",
     rules: "Rules Of Conduct",
     privacypolicy: "Privacy Policy",
-    report: "Report",
     managerules: "Manage Rules",
     manageactivity: "Manage Activity",
     manageteacher: "Manage Teacher",
@@ -109,7 +107,6 @@ export function AppContent() {
             path="/studentbio/violations/:id"
             element={<BioViolations />}
           />
-          <Route path="/report" element={<Report />} />
           {/* <Route path="/settings" element={<Settings />} /> */}
           <Route path="/help" element={<Help />} />
           <Route path="/profileteacher" element={<TeacherProfile />} />

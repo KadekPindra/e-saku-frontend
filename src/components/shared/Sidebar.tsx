@@ -9,7 +9,6 @@ import {
   Users,
   CircleHelp,
   FolderKanban,
-  MessageSquareWarning,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import skensalogo from "@/assets/skensa.png";
@@ -83,7 +82,6 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
-      { label: "Report", icon: MessageSquareWarning, path: "/report" },
       { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
     ],
     master: [
@@ -91,7 +89,6 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
-      { label: "Report", icon: MessageSquareWarning, path: "/report" },
       { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
       { label: "Manage Rules", icon: FolderKanban, path: "/managerules" },
       { label: "Manage Activity", icon: FolderKanban, path: "/manageactivity" },
