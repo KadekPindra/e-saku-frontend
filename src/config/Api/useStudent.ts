@@ -192,17 +192,18 @@ export const useStudentExportByClass = () => {
 
 // Export data History
 export const useStudentHistoryExport = () => {
-  return async () => {
+  return async (month?: number, year?: number) => {
     try {
-      const response = await ApiStudents.exportHistory();
+      const response = await ApiStudents.exportHistory(month, year);
 
       const url = window.URL.createObjectURL(new Blob([response]));
       const link = document.createElement("a");
       link.href = url;
 
-      const fileName = `history_export_${new Date()
-        .toISOString()
-        .slice(0, 10)}.xlsx`;
+      const fileName = `history_export_${year ?? "all"}_${
+        month ?? "all"
+      }_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
@@ -235,4 +236,4 @@ export const useStudentSingleExports = () => {
       throw error;
     }
   };
-}
+};

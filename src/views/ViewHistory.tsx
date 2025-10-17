@@ -251,9 +251,21 @@ const ViewHistory = () => {
 
   const handleConfirmExportData = async () => {
     try {
-      await exportHistory();
+      let month: number | undefined;
+      let year: number | undefined;
+
+      if (selectedMonth !== ALL_MONTHS) {
+        const [y, m] = selectedMonth.split("-");
+        year = parseInt(y);
+        month = parseInt(m);
+      }
+
+      await exportHistory(month, year);
+
       setIsModalExportOpen(false);
-      toast.success("File berhasil diunduh");
+      toast.success(
+        `File berhasil diunduh${month && year ? ` (${month}/${year})` : ""}`
+      );
     } catch (error) {
       console.error("Ekspor Gagal:", error);
       toast.error("Gagal mengekspor file");

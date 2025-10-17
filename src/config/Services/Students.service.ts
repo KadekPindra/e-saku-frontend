@@ -80,9 +80,11 @@ export const ApiStudents = {
       method: "GET",
       responseType: "blob",
     }),
-  exportHistory: (): Promise<Blob> =>
+  exportHistory: (month?: number, year?: number): Promise<Blob> =>
     ApiRequest({
-      url: `/history/export`,
+      url: `/history/export${
+        month && year ? `?month=${month}&year=${year}` : ""
+      }`,
       method: "GET",
       responseType: "blob",
     }),
@@ -91,5 +93,5 @@ export const ApiStudents = {
       url: `/students/export/${student_id}`,
       method: "GET",
       responseType: "blob",
-    })
+    }),
 };
