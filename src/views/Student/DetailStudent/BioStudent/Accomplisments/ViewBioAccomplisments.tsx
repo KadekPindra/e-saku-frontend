@@ -299,50 +299,49 @@ const ViewBioAccomplishments = () => {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <div className="flex items-center">
-        <Link
-          to={
-            userType === "teacher"
-              ? `/studentbio/${student?.id}`
-              : "/profilestudent"
-          }
-          className="group"
-        >
-          <div className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 group-hover:border-green-500 group-hover:bg-green-50 transition-all">
-              <MoveLeft className="h-4 w-4" />
+      {userType === "teacher" && (
+        <div className="flex items-center">
+          <Link to={`/studentbio/${student?.id}`} className="group">
+            <div className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 group-hover:border-green-500 group-hover:bg-green-50 transition-all">
+                <MoveLeft className="h-4 w-4" />
+              </div>
+              <span className="font-medium">Kembali</span>
             </div>
-            <span className="font-medium">Kembali</span>
-          </div>
-        </Link>
-      </div>
+          </Link>
+        </div>
+      )}
 
       {/* Header Section with Gradient Background */}
       <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 sm:p-6 shadow-md">
-        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-          <div className="flex items-center">
-            <div className="bg-green-600/40 p-2 sm:p-3 rounded-lg mr-3">
-              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
-                Riwayat Prestasi
-              </h1>
-              <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                <span className="font-semibold">{studentName}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Total Points Card */}
-          <div className="bg-green-500 rounded-xl p-4 text-white shadow-sm min-w-[140px] sm:min-w-[160px]">
-            <div className="flex items-center gap-3">
-              <div className="bg-green-600/40 p-2 rounded-lg">
-                <Trophy className="h-4 w-4 sm:h-5 sm:w-5" />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center">
+              <div className="bg-green-600/40 p-2 sm:p-3 rounded-lg mr-3">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <p className="text-xl sm:text-2xl font-bold">{totalPoints}</p>
-                <p className="text-xs sm:text-sm text-green-100">Total Poin</p>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                  Riwayat Prestasi
+                </h1>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base">
+                  <span className="font-semibold">{studentName}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Total Points Card */}
+            <div className="bg-green-500 rounded-xl p-4 text-white shadow-sm min-w-[140px] sm:min-w-[160px]">
+              <div className="flex items-center gap-3">
+                <div className="bg-green-600/40 p-2 rounded-lg">
+                  <Trophy className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+                <div>
+                  <p className="text-xl sm:text-2xl font-bold">{totalPoints}</p>
+                  <p className="text-xs sm:text-sm text-green-100">
+                    Total Poin
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -353,7 +352,7 @@ const ViewBioAccomplishments = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <Card className="rounded-xl overflow-hidden shadow-sm">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="bg-green-100 p-2 sm:p-3 rounded-lg">
                 <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
@@ -371,12 +370,12 @@ const ViewBioAccomplishments = () => {
 
         <Card className="rounded-xl overflow-hidden shadow-sm">
           <CardContent className="p-4 sm:p-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                <p className="text-lg sm:text-xl font-bold text-gray-900">
                   {lastAccomplishmentDate
                     ? formatStatDate(lastAccomplishmentDate.toString())
                     : "Tidak ada data"}

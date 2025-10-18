@@ -263,32 +263,27 @@ const ViewBioViolations = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 max-w-full">
+    <div className="space-y-6">
       {/* Back Button */}
-      <div className="flex items-center">
-        <Link
-          to={
-            userType === "teacher"
-              ? `/studentbio/${student?.id}`
-              : "/profilestudent"
-          }
-          className="group"
-        >
-          <div className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 group-hover:border-green-500 group-hover:bg-green-50 transition-all">
-              <MoveLeft className="h-4 w-4" />
+      {userType === "teacher" && (
+        <div className="flex items-center">
+          <Link to={`/studentbio/${student?.id}`} className="group">
+            <div className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 group-hover:border-green-500 group-hover:bg-green-50 transition-all">
+                <MoveLeft className="h-4 w-4" />
+              </div>
+              <span className="font-medium">Kembali</span>
             </div>
-            <span className="font-medium text-sm sm:text-base">Kembali</span>
-          </div>
-        </Link>
-      </div>
+          </Link>
+        </div>
+      )}
 
       {/* Header Section */}
       <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-4 sm:p-6 shadow-md">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-start sm:items-center gap-3">
-              <div className="bg-red-600/40 p-2 rounded-lg flex-shrink-0">
+            <div className="flex items-center">
+              <div className="bg-red-600/40 p-2 sm:p-3 rounded-lg mr-3">
                 <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div className="min-w-0 flex-1">
@@ -301,7 +296,8 @@ const ViewBioViolations = () => {
               </div>
             </div>
 
-            <div className="bg-red-500 rounded-xl p-3 sm:p-4 text-white shadow-sm w-full sm:w-auto sm:min-w-[140px]">
+            {/* Total Points Card */}
+            <div className="bg-red-500 rounded-xl p-4 text-white shadow-sm min-w-[140px] sm:min-w-[160px]">
               <div className="flex items-center gap-3">
                 <div className="bg-red-600/40 p-2 rounded-lg flex-shrink-0">
                   <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -316,43 +312,45 @@ const ViewBioViolations = () => {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Total Pelanggaran */}
-        <div className="p-4 rounded-xl border-2 bg-white">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="bg-red-500/40 p-2 text-red-800 rounded-lg flex-shrink-0">
-              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+      {/* Summary Statistics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="rounded-xl overflow-hidden shadow-sm">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-red-500/40 text-red-800 p-2 sm:p-3 rounded-lg">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {studentViolations.length}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Total Pelanggaran
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                {studentViolations.length}
-              </p>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Total Pelanggaran
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Pelanggaran Terakhir */}
-        <div className="p-4 rounded-xl border-2 bg-white">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="bg-orange-400/40 p-2 text-orange-600 rounded-lg flex-shrink-0">
-              <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+        <Card className="rounded-xl overflow-hidden shadow-sm">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base sm:text-xl font-bold text-gray-900 break-words">
+                  {lastViolationDate
+                    ? formatStatDate(lastViolationDate.toString())
+                    : "Tidak ada data"}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Pelanggaran Terakhir
+                </p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-base sm:text-xl font-bold text-gray-900 break-words">
-                {lastViolationDate
-                  ? formatStatDate(lastViolationDate.toString())
-                  : "Tidak ada data"}
-              </p>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Pelanggaran Terakhir
-              </p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Violations Table */}
