@@ -50,8 +50,12 @@ export const useViolationsByStudentId = (student_id: string) => {
 export const useViolationCreate = () => {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: Partial<IViolation>) => ApiViolations.create(data),
+  return useMutation<
+    { message: string; data: IViolation[] },
+    Error,
+    Partial<IViolation>                   
+  >({
+    mutationFn: (data) => ApiViolations.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["violations"] });
     },
