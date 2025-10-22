@@ -664,47 +664,63 @@ const ESakuForm: React.FC = () => {
     }
 
     if (inputType === "violation") {
-      // Kirim data pelanggaran dengan multiple IDs
       createViolation(
         {
           student_id: studentObj.id.toString(),
-          rulesofconduct_id: violations.map((v) => v.id), // array of IDs
+          rulesofconduct_id: violations.map((v) => v.id),
           description,
           violation_date: date.toISOString().split("T")[0],
           teacher_id: teacherId,
           action: followUpType === "lainnya" ? customFollowUp : followUpType,
         },
         {
-          onSuccess: (data) => {
-            if (selectedFile) {
-              uploadViolationDocumentation.mutate(
-                { id: data.id, file: selectedFile },
-                {
-                  onSuccess: () => {
-                    setSelectedFile(null);
-                  },
-                  onError: () => {
-                    toast.error("Upload dokumentasi gagal");
-                  },
-                }
-              );
+          onSuccess: (response) => {
+            const violations = Array.isArray(response.data)
+              ? response.data
+              : Array.isArray(response)
+              ? response
+              : [];
+
+            if (selectedFile && violations.length > 0) {
+              violations.forEach((violation) => {
+                uploadViolationDocumentation.mutate(
+                  { id: violation.id, file: selectedFile },
+                  {
+                    onSuccess: () => {
+                      setSelectedFile(null);
+                    },
+                    onError: () => {
+                      toast.error(
+                        `Upload dokumentasi gagal untuk pelanggaran ID ${violation.id}`
+                      );
+                    },
+                  }
+                );
+              });
+
+              setSelectedFile(null);
             }
+
             setShowSuccess(true);
             resetForm();
             setIsEditMode(false);
             navigate(location.pathname, { replace: true });
             window.scrollTo({ top: 0, behavior: "smooth" });
+
             toast.success(
               isEditMode
                 ? "Data berhasil diperbarui"
                 : "Data pelanggaran berhasil disimpan"
             );
+
             setTimeout(() => setShowSuccess(false), 3000);
           },
+
           onError: (err) => {
             toast.error("Data pelanggaran gagal disimpan");
             console.error("Gagal kirim pelanggaran:", err);
           },
+
           onSettled: () => setIsSubmitting(false),
         }
       );
@@ -1153,22 +1169,22 @@ const ESakuForm: React.FC = () => {
                             )}
                           </SelectContent>
                           {/* {inputType === "violation" && ( */}
-                            <div className="hidden items-center gap-2 mt-2">
-                              <Checkbox
-                                id="filter-my-classes"
-                                checked={showOnlyTeacherClass}
-                                onCheckedChange={(checked) =>
-                                  setShowOnlyTeacherClass(!!checked)
-                                }
-                                className="text-green-600"
-                              />
-                              <label
-                                htmlFor="filter-my-classes"
-                                className="text-sm text-gray-600 select-none"
-                              >
-                                Tampilkan hanya kelas yang diampu
-                              </label>
-                            </div>
+                          <div className="hidden items-center gap-2 mt-2">
+                            <Checkbox
+                              id="filter-my-classes"
+                              checked={showOnlyTeacherClass}
+                              onCheckedChange={(checked) =>
+                                setShowOnlyTeacherClass(!!checked)
+                              }
+                              className="text-green-600"
+                            />
+                            <label
+                              htmlFor="filter-my-classes"
+                              className="text-sm text-gray-600 select-none"
+                            >
+                              Tampilkan hanya kelas yang diampu
+                            </label>
+                          </div>
                           {/* )} */}
                         </Select>
                       )}
@@ -1848,7 +1864,7 @@ const ESakuForm: React.FC = () => {
                   isSubmitting ||
                   (inputType === "violation" &&
                     !isEditMode &&
-                    violations.length === 0)  // Tambahkan kondisi ini
+                    violations.length === 0) // Tambahkan kondisi ini
                 }
               >
                 {isEditMode ? "Perbarui Data" : "Simpan"}
