@@ -10,8 +10,16 @@ export const ApiViolations = {
     ApiRequest({ url: `/violations/student/${student_id}`, method: "GET" }),
   getByTeacherId: (teacher_id: string): Promise<IViolation[]> =>
     ApiRequest({ url: `/violations/teacher/${teacher_id}`, method: "GET" }),
-  create: (data: Partial<IViolation>): Promise<IViolation> =>
-    ApiRequest({ url: "/violations", method: "POST", body: data }),
+  create: async (
+    data: Partial<IViolation>
+  ): Promise<{ message: string; data: IViolation[] }> => {
+    const res = await ApiRequest({
+      url: "/violations",
+      method: "POST",
+      body: data,
+    });
+    return res.data as { message: string; data: IViolation[] };
+  },
   uploadDocumentation: (id: number, file: File): Promise<IViolation> => {
     const formData = new FormData();
     formData.append("image_documentation", file);
