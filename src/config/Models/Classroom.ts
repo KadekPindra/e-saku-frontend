@@ -1,3 +1,4 @@
+import { IHomeTeacher } from "./HomeTeachers";
 import { IMajor } from "./Major";
 import { IStudent } from "./Student";
 import { ITeacher } from "./Teacher";
@@ -9,9 +10,11 @@ export interface IClassroom {
   grade: IGrade;
   grade_id: number;
   teacher_id: number;
+  homeroom_teacher_id: number;
   total_student: number;
   major_id: number;
   teacher?: ITeacher;
+  homeroom_teacher?: IHomeTeacher;
   students?: IStudent[];
   major?: IMajor;
   created_at: string;
