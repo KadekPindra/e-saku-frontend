@@ -383,6 +383,13 @@ const ViewHistory = () => {
         );
       }
 
+      // 🔽 Urutkan dari terbaru ke terlama
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.violation_date ?? 0).getTime();
+        const dateB = new Date(b.violation_date ?? 0).getTime();
+        return dateB - dateA;
+      });
+
       return filtered;
     } else {
       let filtered = enhancedAccomplishments;
@@ -432,6 +439,13 @@ const ViewHistory = () => {
             accomplishment.student?.classroom?.id === classIdNum
         );
       }
+
+      // 🔽 Urutkan dari terbaru ke terlama
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.accomplishment_date ?? 0).getTime();
+        const dateB = new Date(b.accomplishment_date ?? 0).getTime();
+        return dateB - dateA;
+      });
 
       return filtered;
     }

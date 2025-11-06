@@ -1,18 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ITrainer } from "../Models/Trainer";
-import { ApiTrainers } from "../Services/Trainers.service";
+import { ApiTrainer } from "../Services/Trainers.service";
 
 export const useTrainer = () => {
   return useQuery<ITrainer[]>({
     queryKey: ["trainers"],
-    queryFn: () => ApiTrainers.getAll(),
+    queryFn: () => ApiTrainer.getAll(),
   });
 };
 
 export const useTrainerById = (id: number) => {
   return useQuery<ITrainer>({
     queryKey: ["trainer", id],
-    queryFn: () => ApiTrainers.getById(id),
+    queryFn: () => ApiTrainer.getById(id),
     enabled: !!id,
   });
 };
@@ -21,7 +21,7 @@ export const useTrainerCreate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<ITrainer>) => ApiTrainers.create(data),
+    mutationFn: (data: Partial<ITrainer>) => ApiTrainer.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trainers"] });
     },
@@ -36,7 +36,7 @@ export const useTrainerUpdate = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<ITrainer> }) =>
-      ApiTrainers.update(id, data),
+      ApiTrainer.update(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["trainers"] });
       queryClient.invalidateQueries({ queryKey: ["trainer", id] });
@@ -52,7 +52,7 @@ export const useTrainerUpdatePassword = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<ITrainer> }) =>
-      ApiTrainers.updatePassword(id, data),
+      ApiTrainer.updatePassword(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["trainer", id] });
     },
@@ -63,7 +63,7 @@ export const useTrainerDelete = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => ApiTrainers.delete(id),
+    mutationFn: (id: number) => ApiTrainer.delete(id),
     onSuccess: (id) => {
       queryClient.removeQueries({ queryKey: ["trainer", id] });
       queryClient.invalidateQueries({ queryKey: ["trainers"] });
