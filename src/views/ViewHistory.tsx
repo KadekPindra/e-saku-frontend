@@ -395,15 +395,31 @@ const ViewHistory = () => {
     }
   }, [filteredDataWithDate, selectedMonth, selectedHistory]);
 
-  // Apply class filter
+  // Apply class filter dan urutkan dari terbaru
   const finalFilteredData = useMemo(() => {
-    if (selectedClassId === ALL_CLASSES) return filteredDataWithMonth;
+    let filtered = filteredDataWithMonth;
 
-    const classIdNum = parseInt(selectedClassId);
-    return filteredDataWithMonth.filter(
-      (item) => item.student?.classroom?.id === classIdNum
-    );
-  }, [filteredDataWithMonth, selectedClassId]);
+    if (selectedClassId !== ALL_CLASSES) {
+      const classIdNum = parseInt(selectedClassId);
+      filtered = filtered.filter(
+        (item) => item.student?.classroom?.id === classIdNum
+      );
+    }
+
+    return filtered.sort((a, b) => {
+      const dateA =
+        selectedHistory === "violationhistory"
+          ? new Date(a.violation_date ?? 0).getTime()
+          : new Date(a.accomplishment_date ?? 0).getTime();
+
+      const dateB =
+        selectedHistory === "violationhistory"
+          ? new Date(b.violation_date ?? 0).getTime()
+          : new Date(b.accomplishment_date ?? 0).getTime();
+
+      return dateB - dateA;
+    });
+  }, [filteredDataWithMonth, selectedClassId, selectedHistory]);
 
   // Pagination
   const totalPages = Math.ceil(
