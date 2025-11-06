@@ -202,7 +202,7 @@ export const useStudentHistoryExport = () => {
 
       const fileName = `history_export_${year ?? "all"}_${
         month ?? "all"
-      }_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      }_${new Date().toISOString().slice(0, 10)}.pdf`;
 
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
