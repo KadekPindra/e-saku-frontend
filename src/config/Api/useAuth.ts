@@ -34,8 +34,8 @@ export const useLogin = () => {
         localStorage.setItem("student_id", user.student_id);
         localStorage.setItem("user_type", "student");
         if (user.role) localStorage.setItem("role", user.role);
-      } else if (user?.trainer_id) {
-        localStorage.setItem("trainer_id", user.trainer_id)
+      } else if (user?.role === "trainer") {
+        localStorage.setItem("trainer_id", user.id)
         localStorage.setItem("user_type", "trainer")
         if (user.role) localStorage.setItem("role", user.role)
       }
@@ -44,6 +44,8 @@ export const useLogin = () => {
         navigate("/"); 
       } else if (user?.student_id) {
         navigate("/profilestudent");
+      } else if (user?.role === "trainer") {
+        navigate("/profiletrainer");
       } else {
         navigate("/");  
       }

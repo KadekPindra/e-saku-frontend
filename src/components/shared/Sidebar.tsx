@@ -9,6 +9,7 @@ import {
   Users,
   CircleHelp,
   FolderKanban,
+  ChevronDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import skensalogo from "@/assets/skensa.png";
@@ -30,6 +31,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1024
   );
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const role = localStorage.getItem("role") || "student";
 
@@ -68,12 +70,18 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
     [isMobile, isMobileScreen, isOpen, toggleSidebar]
   );
 
-  // Perbaikan 2: Bungkus handleMenuItemClick
   const handleMenuItemClick = useCallback(() => {
     if (isMobile || isMobileScreen) {
       closeSidebar();
     }
   }, [isMobile, isMobileScreen, closeSidebar]);
+
+  const toggleDropdown = useCallback(
+    (label: string) => {
+      setOpenDropdown(openDropdown === label ? null : label);
+    },
+    [openDropdown]
+  );
 
   // Role-based menu items
   const rolePlatformItems: Record<string, any[]> = {
@@ -82,18 +90,30 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
-      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
+      {
+        label: "Manage",
+        icon: FolderKanban,
+        isDropdown: true,
+        subItems: [{ label: "Rules", icon: DiamondMinusIcon, path: "/rules" }],
+      },
     ],
     master: [
       { label: "Dashboard", icon: Home, path: "/" },
       { label: "Student", icon: Users, path: "/student" },
       { label: "E-saku Form", icon: FileText, path: "/esakuform" },
       { label: "History", icon: History, path: "/history" },
-      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
-      { label: "Manage Rules", icon: FolderKanban, path: "/managerules" },
-      { label: "Manage Activity", icon: FolderKanban, path: "/manageactivity" },
-      { label: "Manage Teacher", icon: FolderKanban, path: "/manageteacher" },
-      // { label: "Manage Users", icon: Users, path: "/manageuser" },
+      {
+        label: "Manage",
+        icon: FolderKanban,
+        isDropdown: true,
+        subItems: [
+          { label: "Rules", icon: DiamondMinusIcon, path: "/manageRules" },
+          { label: "Activity", icon: FolderKanban, path: "/manageactivity" },
+          { label: "Teacher", icon: FolderKanban, path: "/manageteacher" },
+          { label: "Users", icon: Users, path: "/manageuser" },
+          { label: "Wali Kelas", icon: User, path: "/managehometeacher"}
+        ],
+      },
     ],
     student: [
       {
@@ -113,11 +133,11 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
         icon: Users,
         path: `/student/extra`,
       },
-      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" }
+      { label: "Rules", icon: DiamondMinusIcon, path: "/rules" },
     ],
     trainer: [
       {
-        label: "Manage Extracurricular", // Menu baru
+        label: "Manage Extracurricular",
         icon: FolderKanban,
         path: "/manageextracurricular",
       },
@@ -163,12 +183,22 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
         new RegExp(`^/studentbio/violations/${studentId}$`),
         new RegExp(`^/studentbio/violations/${studentId}/.*$`),
       ],
+      "/manageactivity": [/^\/manageactivity$/],
+      "/manageteacher": [/^\/manageteacher$/],
+      "/manageuser": [/^\/manageuser$/],
     };
 
     const patterns = matchPatterns[itemPath];
     if (!patterns) return currentPath === itemPath;
 
     return patterns.some((regex) => regex.test(currentPath));
+  };
+
+  const isDropdownActive = (item: any): boolean => {
+    if (!item.isDropdown || !item.subItems) return false;
+    return item.subItems.some((subItem: any) =>
+      isActivePath(activeItem, subItem.path)
+    );
   };
 
   const SidebarContent = (
@@ -207,24 +237,89 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
         <ul className="space-y-1">
           {platformItems.map((item, index) => (
             <li key={index}>
-              <Link
-                to={item.path}
-                onClick={handleMenuItemClick}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
-                  isActivePath(activeItem, item.path)
-                    ? "bg-green-100 text-green-600 font-medium"
-                    : "hover:bg-gray-100 hover:text-black"
-                }`}
-              >
-                <item.icon
-                  className={`w-5 h-5 flex-shrink-0 ${
+              {item.isDropdown ? (
+                <>
+                  <div
+                    onClick={() => toggleDropdown(item.label)}
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group cursor-pointer ${
+                      isDropdownActive(item) || openDropdown === item.label
+                        ? "bg-green-100 text-green-600 font-medium"
+                        : "hover:bg-gray-100 hover:text-black"
+                    }`}
+                  >
+                    <item.icon
+                      className={`w-5 h-5 flex-shrink-0 ${
+                        isDropdownActive(item) || openDropdown === item.label
+                          ? "text-green-600"
+                          : "text-gray-500"
+                      }`}
+                    />
+                    <span className="">{item.label}</span>
+                    <div className="w-full flex justify-end items-center">
+                      <ChevronDown 
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          openDropdown === item.label 
+                            ? "text-green-600 rotate-0" 
+                            : "text-gray-500 -rotate-90"
+                        }`} 
+                      />
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {openDropdown === item.label && (
+                      <motion.ul
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="ml-8 mt-1 space-y-1 overflow-hidden"
+                      >
+                        {item.subItems.map((subItem: any, subIndex: number) => (
+                          <li key={subIndex}>
+                            <Link
+                              to={subItem.path}
+                              onClick={handleMenuItemClick}
+                              className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                                isActivePath(activeItem, subItem.path)
+                                  ? "bg-green-100 text-green-600 font-medium"
+                                  : "hover:bg-gray-100 hover:text-black"
+                              }`}
+                            >
+                              <subItem.icon
+                                className={`w-5 h-5 flex-shrink-0 ${
+                                  isActivePath(activeItem, subItem.path)
+                                    ? "text-green-600"
+                                    : "text-gray-500"
+                                }`}
+                              />
+                              <span className="truncate">{subItem.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
+                </>
+              ) : (
+                <Link
+                  to={item.path}
+                  onClick={handleMenuItemClick}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
                     isActivePath(activeItem, item.path)
-                      ? "text-green-600"
-                      : "text-gray-500"
+                      ? "bg-green-100 text-green-600 font-medium"
+                      : "hover:bg-gray-100 hover:text-black"
                   }`}
-                />
-                <span className="truncate">{item.label}</span>
-              </Link>
+                >
+                  <item.icon
+                    className={`w-5 h-5 flex-shrink-0 ${
+                      isActivePath(activeItem, item.path)
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              )}
             </li>
           ))}
         </ul>

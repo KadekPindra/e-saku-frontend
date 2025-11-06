@@ -34,6 +34,7 @@ import ManageUser from "./pages/ManageUser";
 import ManageTeacher from "./pages/ManageTeacher";
 import ProfileTrainer from "./pages/ProfileTrainer";
 import ManageExtracurricular from "./views/Trainer/ViewManageExtracurricular";
+import ManageHomeTeacher from "./pages/ManageHomeTeacher";
 
 // import PrivacyPolicy from "./pages/PrivacyPolicy";
 
@@ -57,10 +58,11 @@ const LayoutWrapper = () => {
     managerules: "Manage Rules",
     manageactivity: "Manage Activity",
     manageteacher: "Manage Teacher",
+    managehometeacher: "Manage Wali Kelas",
     manageuser: "Manage Users",
     studentextra: "Student Extra",
     profiletrainer: "Trainer Profile",
-    manageextracurricular: "Manage Extracurricular"
+    manageextracurricular: "Manage Extracurricular",
   };
 
   const title = pageTitles[path] || "Unknown Page";
@@ -122,6 +124,7 @@ export function AppContent() {
           <Route path="/manageuser" element={<ManageUser />} />
           <Route path="/profiletrainer" element={<ProfileTrainer />} />
           <Route path="/manageextracurricular" element={<ManageExtracurricular />} />
+          <Route path="/managehometeacher" element={<ManageHomeTeacher />} />
           {/* <Route path="/privacypolicy" element={<PrivacyPolicy/>} /> */}
         </Route>
       </Route>

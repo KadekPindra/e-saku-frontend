@@ -145,9 +145,6 @@ const ESakuForm: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [, setPhotoUrl] = useState<string | undefined>(undefined);
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
-  // const [isClassTaughtByTeacher, setIsClassTaughtByTeacher] = useState<
-  //   boolean | null
-  // >(null);
   const [showOnlyTeacherClass, setShowOnlyTeacherClass] =
     useState<boolean>(false);
   const [violations, setViolations] = useState<
@@ -175,6 +172,23 @@ const ESakuForm: React.FC = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const dragCounter = useRef<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // Format classroom options for ComboBox
+  const classroomOptions = useMemo((): ComboBoxOption[] => {
+    let filtered = classrooms || [];
+
+    if (showOnlyTeacherClass) {
+      filtered = filtered.filter(
+        (classroom) => classroom.teacher_id === teacherId
+      );
+    }
+
+    return filtered.map((classroom) => ({
+      value: classroom.id.toString(),
+      label: classroom.display_name,
+      id: classroom.id,
+    }));
+  }, [classrooms, showOnlyTeacherClass, teacherId]);
 
   const studentOptions = useMemo((): ComboBoxOption[] => {
     return students.map((student) => ({
@@ -225,7 +239,6 @@ const ESakuForm: React.FC = () => {
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       if (files.length > 1) {
-        // Optionally handle error for multiple files
         return;
       }
       const file = files[0];
@@ -268,17 +281,14 @@ const ESakuForm: React.FC = () => {
 
   useEffect(() => {
     if (editData && classrooms && classrooms.length > 0) {
-      // Isi form dengan data dari report
       setStudentName(editData.student?.name || "");
       setDescription(editData.violation_details || "");
       setIsEditMode(true);
 
-      // Set tanggal dari report
       if (editData.violation_date) {
         setDate(new Date(editData.violation_date));
       }
 
-      // Set jenis input berdasarkan data
       if (editData.accomplishment_type) {
         setInputType("achievement");
         setAchievementTypeOptions(editData.accomplishment_type);
@@ -289,7 +299,6 @@ const ESakuForm: React.FC = () => {
         setInputType("violation");
         setViolationType(editData.rules_of_conduct?.name || "");
 
-        // Handle follow-up type dengan array yang baru
         if (editData.action && !followUpOptions.includes(editData.action)) {
           setFollowUpType("lainnya");
           setCustomFollowUp(editData.action);
@@ -303,7 +312,6 @@ const ESakuForm: React.FC = () => {
         }
       }
 
-      // Set kelas berdasarkan data siswa
       if (editData.student?.class) {
         setClassType(editData.student.class.display_name);
         setSelectedClassId(editData.student.class.id);
@@ -320,7 +328,6 @@ const ESakuForm: React.FC = () => {
   }, [editData, classrooms]);
 
   useEffect(() => {
-    // Jika tidak ada editData, pastikan mode edit dimatikan
     if (!location.state?.editData) {
       setIsEditMode(false);
     }
@@ -367,11 +374,8 @@ const ESakuForm: React.FC = () => {
     inputType,
   ]);
 
-  // Handler untuk perubahan jenis prestasi
   const handleAchievementTypeChange = (value: string) => {
     setAchievementTypeOptions(value as AchievementTypeOptions);
-
-    // Update poin berdasarkan jenis prestasi
     const selectedType = accomplishmentTypes.find(
       (type) => type.type === value
     );
@@ -383,7 +387,6 @@ const ESakuForm: React.FC = () => {
   const handleAchievementLevelChange = (value: string) => {
     setAchievementLevel(value as AchievementLevelOptions);
 
-    // Update poin berdasarkan tingkatan
     const selectedType = accomplishmentTypes.find(
       (type) => type.type === achievementTypeOptions
     );
@@ -400,7 +403,6 @@ const ESakuForm: React.FC = () => {
   const handleRankChange = (value: string) => {
     setRank(value);
 
-    // Update poin berdasarkan peringkat
     const selectedType = accomplishmentTypes.find(
       (type) => type.type === achievementTypeOptions
     );
@@ -465,8 +467,6 @@ const ESakuForm: React.FC = () => {
     errors,
   ]);
 
-  // Di dalam handleSubmit dan handleSendAsReport, setelah berhasil
-
   const resetForm = () => {
     setInputType("violation");
     setClassType("");
@@ -490,6 +490,7 @@ const ESakuForm: React.FC = () => {
     setTotalViolationPoints(0);
     setSelectedStudentId("");
     setTotalPoints(0);
+    setSelectedClassId(null);
 
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: "smooth" });
@@ -500,7 +501,7 @@ const ESakuForm: React.FC = () => {
     const newErrors: ESakuFormErrorState = {};
 
     if (!studentName.trim()) newErrors.studentName = "Nama siswa diperlukan";
-    if (!classType) newErrors.classType = "Kelas harus dipilih";
+    if (!selectedClassId) newErrors.classType = "Kelas harus dipilih";
     if (!date) newErrors.date = "Tanggal diperlukan";
 
     if (inputType === "violation" && violations.length === 0) {
@@ -557,7 +558,7 @@ const ESakuForm: React.FC = () => {
 
     if (step === 0) {
       if (!studentName.trim()) newErrors.studentName = "Nama siswa diperlukan";
-      if (!classType) newErrors.classType = "Kelas harus dipilih";
+      if (!selectedClassId) newErrors.classType = "Kelas harus dipilih";
       if (!date) newErrors.date = "Tanggal diperlukan";
     } else if (step === 1) {
       if (inputType === "violation" && violations.length === 0) {
@@ -609,9 +610,6 @@ const ESakuForm: React.FC = () => {
       const localUrl = URL.createObjectURL(file);
       setPhotoUrl(localUrl);
       setSelectedFile(file);
-      console.log("File selected:", file);
-    } else {
-      console.log("No file selected");
     }
 
     e.target.value = "";
@@ -725,7 +723,6 @@ const ESakuForm: React.FC = () => {
         }
       );
     } else {
-      // Dapatkan ID dari data yang dipilih
       const selectedType = accomplishmentTypes.find(
         (type) => type.type === achievementTypeOptions
       );
@@ -781,7 +778,6 @@ const ESakuForm: React.FC = () => {
     let classroomObj;
 
     if (isEditMode) {
-      // Gunakan data langsung dari editData
       if (!editData || !editData.student) {
         toast.error("Data siswa tidak valid");
         return;
@@ -790,9 +786,8 @@ const ESakuForm: React.FC = () => {
       studentObj = editData.student;
       classroomObj = editData.student.class;
     } else {
-      // Mode normal
       studentObj = students.find((s) => s.name === studentName);
-      classroomObj = classrooms?.find((c) => c.name === classType);
+      classroomObj = classrooms?.find((c) => c.id === selectedClassId);
     }
 
     if (!studentObj || !classroomObj) {
@@ -802,7 +797,6 @@ const ESakuForm: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Kirim satu laporan per pelanggaran
     if (inputType === "violation") {
       const reportPromises = violations.map((violation) => {
         const reportData = {
@@ -838,7 +832,6 @@ const ESakuForm: React.FC = () => {
         })
         .finally(() => setIsSubmitting(false));
     } else {
-      // Untuk prestasi, seperti sebelumnya
       const selectedType = accomplishmentTypes.find(
         (type) => type.type === achievementTypeOptions
       );
@@ -853,7 +846,7 @@ const ESakuForm: React.FC = () => {
         violation_date: date.toISOString().split("T")[0],
         violation_details: description,
         action: followUpType === "lainnya" ? customFollowUp : followUpType,
-        rulesofconduct_id: selectedRule?.id ?? 0, // Selected from rules
+        rulesofconduct_id: selectedRule?.id ?? 0,
         points: selectedRule?.points ?? 0,
       };
 
@@ -918,9 +911,12 @@ const ESakuForm: React.FC = () => {
     }
   }
 
+  const selectedClassDisplayName =
+    classrooms?.find((c) => c.id === selectedClassId)?.display_name || "";
+
   const summaryData = {
     name: studentName,
-    class: classType,
+    class: selectedClassDisplayName,
     type: inputType === "violation" ? "Pelanggaran" : "Prestasi",
     detail: inputType === "violation" ? selectedRule?.name : description,
     level:
@@ -948,18 +944,15 @@ const ESakuForm: React.FC = () => {
   };
 
   const handleOpenConfirm = (type: "report" | "save") => {
-    // Validasi untuk semua kasus
     const validationErrors: ESakuFormErrorState = {};
 
-    // Validasi field dasar yang selalu diperlukan
     if (!studentName.trim())
       validationErrors.studentName = "Nama siswa diperlukan";
-    if (!classType) validationErrors.classType = "Kelas harus dipilih";
+    if (!selectedClassId) validationErrors.classType = "Kelas harus dipilih";
     if (!date) validationErrors.date = "Tanggal diperlukan";
     if (!description.trim())
       validationErrors.description = "Deskripsi diperlukan";
 
-    // Validasi khusus berdasarkan jenis input
     if (inputType === "violation") {
       if (violations.length === 0) {
         validationErrors.violationType =
@@ -978,29 +971,19 @@ const ESakuForm: React.FC = () => {
       }
     }
 
-    // Jika ada error, set error dan jangan buka modal
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    // Jika validasi berhasil, buka modal
     setConfirmType(type);
     setIsModalOpen(true);
   };
 
-  const filteredClassrooms = classrooms?.filter((classroom) => {
-    // if (inputType === "achievement") {
-    //   return classroom.teacher_id === teacherId;
-    // }
-    return showOnlyTeacherClass ? classroom.teacher_id === teacherId : true;
-  });
-
   const handleConfirm = () => {
     setIsModalOpen(false);
-    setConfirmType(null); // Reset confirmType setelah digunakan
+    setConfirmType(null);
 
-    // Panggil fungsi yang sesuai secara langsung
     if (confirmType === "report") {
       handleSendAsReport();
     } else if (confirmType === "save") {
@@ -1126,50 +1109,33 @@ const ESakuForm: React.FC = () => {
                       error={errors.classType}
                     >
                       {isEditMode ? (
-                        // Display class name directly for edit mode
                         <Input
-                          value={classType}
+                          value={selectedClassDisplayName}
                           readOnly
                           className="bg-gray-100"
                         />
                       ) : (
-                        <Select
-                          value={classType}
-                          onValueChange={(value) => {
-                            setClassType(value);
-                            const selectedClass = classrooms?.find(
-                              (c: IClassroom) => c.display_name === value
-                            );
-                            setSelectedClassId(selectedClass?.id || null);
-                            setStudentName("");
-
-                            // const teacherIdNum = Number(teacherId);
-                            // setIsClassTaughtByTeacher(
-                            //   selectedClass?.teacher_id === teacherIdNum
-                            // );
-                          }}
-                        >
-                          <SelectTrigger
-                            className={`${inputClass} ${
-                              errors.classType ? inputErrorClass : ""
-                            }`}
-                          >
-                            <SelectValue placeholder="Pilih Kelas" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {filteredClassrooms?.map(
-                              (classroom: IClassroom) => (
-                                <SelectItem
-                                  key={classroom.id}
-                                  value={classroom.display_name}
-                                >
-                                  {classroom.display_name}
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                          {/* {inputType === "violation" && ( */}
-                          <div className="hidden items-center gap-2 mt-2">
+                        <>
+                          <ComboBox
+                            options={classroomOptions}
+                            className="font-normal"
+                            value={selectedClassId?.toString() || ""}
+                            onValueChange={(value, option) => {
+                              setSelectedClassId(
+                                value ? parseInt(value) : null
+                              );
+                              setClassType(option?.label || "");
+                              setStudentName("");
+                              setSelectedStudentId(null);
+                            }}
+                            placeholder="Pilih Kelas"
+                            searchPlaceholder="Cari kelas..."
+                            emptyMessage="Tidak ada kelas yang ditemukan"
+                            error={errors.classType}
+                            allowClear={true}
+                            maxHeight="max-h-48"
+                          />
+                          <div className="flex items-center gap-2 mt-2">
                             <Checkbox
                               id="filter-my-classes"
                               checked={showOnlyTeacherClass}
@@ -1185,8 +1151,7 @@ const ESakuForm: React.FC = () => {
                               Tampilkan hanya kelas yang diampu
                             </label>
                           </div>
-                          {/* )} */}
-                        </Select>
+                        </>
                       )}
                     </FormFieldGroup>
                   </div>
@@ -1266,6 +1231,7 @@ const ESakuForm: React.FC = () => {
               </>
             )}
 
+            {/* ... (bagian form step 1 dan 2 tetap sama seperti sebelumnya) ... */}
             {(!isMobileView || formStep === 1) && (
               <>
                 <div className="space-y-4">
@@ -1295,7 +1261,6 @@ const ESakuForm: React.FC = () => {
                               />
                             </div>
 
-                            {/* Daftar pelanggaran dengan checkbox */}
                             <div className="max-h-60 overflow-y-auto border rounded-md">
                               {filteredRules.length > 0 ? (
                                 filteredRules.map((rule) => (
@@ -1346,7 +1311,6 @@ const ESakuForm: React.FC = () => {
                         </FormFieldGroup>
                       </div>
 
-                      {/* Tampilkan pelanggaran yang dipilih */}
                       {violations.length > 0 && (
                         <div className="border border-gray-200 rounded-lg p-4">
                           <h3 className="font-medium text-gray-700 mb-2">
@@ -1839,22 +1803,6 @@ const ESakuForm: React.FC = () => {
             </Button>
 
             <div className="flex gap-3">
-              {/* {inputType === "violation" && !isEditMode && (
-                <Button
-                  type="button"
-                  className={btnDarkClass}
-                  onClick={() => handleOpenConfirm("report")}
-                  disabled={
-                    isSubmitting ||
-                    isClassTaughtByTeacher === true || // Hanya aktif jika kelas bukan diampu
-                    violations.length === 0
-                  }
-                >
-                  <Send className="h-4 w-4" />
-                  Kirim sebagai Laporan
-                </Button>
-              )} */}
-
               <LoadingSpinnerButton
                 isLoading={isSubmitting}
                 onClick={() => handleOpenConfirm("save")}
@@ -1864,7 +1812,7 @@ const ESakuForm: React.FC = () => {
                   isSubmitting ||
                   (inputType === "violation" &&
                     !isEditMode &&
-                    violations.length === 0) // Tambahkan kondisi ini
+                    violations.length === 0)
                 }
               >
                 {isEditMode ? "Perbarui Data" : "Simpan"}

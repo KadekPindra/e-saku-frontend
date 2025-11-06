@@ -16,11 +16,13 @@ export const ApiExtracurriculars = {
       method: "GET",
     }),
   updateStatusHistory: (
-    history_id: number
+    history_id: number,
+    status: string
   ): Promise<IExtracurricularHistory[]> =>
     ApiRequest({
       url: `/extracurricular-history/${history_id}/status`,
-      method: "GET",
+      method: "POST",
+      body: { status, _method: "PUT" },
     }),
   getById: (id: number): Promise<IExtracurricular> =>
     ApiRequest({ url: `/extracurriculars/${id}`, method: "GET" }),

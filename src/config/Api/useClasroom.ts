@@ -33,8 +33,24 @@ export const useClassroomByTeacherId = () => {
   });
 };
 
+export const useClassroomByHomeroomTeacherId = () => {
+  const homeroom_teacher_id = parseInt(
+    localStorage.getItem("homeroom_teacher_id") || "0",
+    10
+  );
 
-export const useClassroomByAssignTeacherId = (teacherId: number,) => {
+  return useQuery({
+    queryKey: ["homeroomTeacherClasses", homeroom_teacher_id],
+    queryFn: async () => {
+      if (!homeroom_teacher_id) return [];
+      return ApiClassrooms.getByHomeroomTeacherId(homeroom_teacher_id);
+    },
+    enabled: !!homeroom_teacher_id,
+    select: (data) => data || [],
+  });
+};
+
+export const useClassroomByAssignTeacherId = (teacherId: number) => {
   return useQuery({
     queryKey: ["teacherClasses", teacherId],
     queryFn: async () => {
@@ -42,6 +58,18 @@ export const useClassroomByAssignTeacherId = (teacherId: number,) => {
       return ApiClassrooms.getByTeacherId(teacherId);
     },
     enabled: !!teacherId,
+    select: (data) => data || [],
+  });
+};
+
+export const useClassroomByAssignHomeroomTeacherId = (homeRoomTeacherId: number) => {
+  return useQuery({
+    queryKey: ["homeroomTeacherClasses", homeRoomTeacherId],
+    queryFn: async () => {
+      if (!homeRoomTeacherId) return [];
+      return ApiClassrooms.getByHomeroomTeacherId(homeRoomTeacherId);
+    },
+    enabled: !!homeRoomTeacherId,
     select: (data) => data || [],
   });
 };
@@ -95,12 +123,45 @@ export const useAssignTeacherToClassroom = () => {
   });
 };
 
+export const useAssignHomeroomTeacherToClassroom = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      classroomIds,
+      homeRoomTeacherId,
+    }: {
+      classroomIds: number[];
+      homeRoomTeacherId: number;
+    }) => ApiClassrooms.assignHomeroomTeacher(homeRoomTeacherId, classroomIds),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
+  });
+};
+
 export const useRemoveTeacherFromClassroom = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (classroomIds: number[]) =>
       ApiClassrooms.removeTeacher(classroomIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["teachers"] });
+    },
+  });
+};
+
+export const useRemoveHomeroomTeacherFromClassroom = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (classroomIds: number[]) =>
+      ApiClassrooms.removeHomeroomTeacher(classroomIds),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
       queryClient.invalidateQueries({ queryKey: ["teachers"] });

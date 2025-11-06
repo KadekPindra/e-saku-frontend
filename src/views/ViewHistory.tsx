@@ -48,6 +48,9 @@ import { useAccomplishmentsType } from "@/config/Api/useAccomplismentsType";
 import { useAccomplishmentsRanks } from "@/config/Api/useAccomplishmentsRanks";
 import { useAccomplishmentsLevel } from "@/config/Api/useAccomplishmentsLevel";
 import { useClassroom } from "@/config/Api/useClasroom";
+import ComboBox, {
+  ComboBoxOption,
+} from "@/components/shared/component/ComboBox";
 
 // Helper function to format date as YYYY-MM-DD in local time
 const formatDate = (date: Date) => {
@@ -90,7 +93,7 @@ const ViewHistory = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>(ALL_MONTHS);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isModalExportOpen, setIsModalExportOpen] = useState(false);
-  const [showFilters, setShowFilters] = useState(false); // State untuk menampilkan/sembunyikan filter
+  const [showFilters, setShowFilters] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Table states
@@ -171,6 +174,18 @@ const ViewHistory = () => {
       levelName: levelLookup[accomplishment.level_id] || "Unknown",
     }));
   }, [accomplishmentsData, typeLookup, rankLookup, levelLookup]);
+
+  // Format classroom options for ComboBox
+  const classroomOptions = useMemo((): ComboBoxOption[] => {
+    return [
+      { value: ALL_CLASSES, label: "Semua Kelas" },
+      ...(classrooms?.map((classroom) => ({
+        value: classroom.id.toString(),
+        label: classroom.display_name,
+        id: classroom.id,
+      })) || []),
+    ];
+  }, [classrooms]);
 
   const handleHistoryChange = (value: string) => {
     if (value === "violationhistory" || value === "accomplishmenthistory") {
@@ -320,106 +335,115 @@ const ViewHistory = () => {
     return Array.from(months).sort().reverse();
   }, [violationsData, enhancedAccomplishments, selectedHistory]);
 
-  // Filter data berdasarkan search text
-  const filteredData = useMemo(() => {
-    if (selectedHistory === "violationhistory") {
-      return (
-        violationsData.filter(
-          (violation) =>
-            searchText === "" ||
-            violation.student?.name
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            violation.rules_of_conduct?.name
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            violation.violation_date
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase())
-        ) || []
-      );
-    } else {
-      return (
-        enhancedAccomplishments.filter(
-          (accomplishment) =>
-            searchText === "" ||
-            accomplishment.student?.name
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            accomplishment.typeName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            accomplishment.rankName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            accomplishment.levelName
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase()) ||
-            accomplishment.accomplishment_date
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase())
-        ) || []
-      );
-    }
-  }, [searchText, violationsData, enhancedAccomplishments, selectedHistory]);
-
-  // Apply date filter
-  const filteredDataWithDate = useMemo(() => {
-    if (!selectedDate) return filteredData;
-
-    const dateStr = formatDate(selectedDate);
-
-    if (selectedHistory === "violationhistory") {
-      return filteredData.filter((violation) =>
-        violation.violation_date?.includes(dateStr)
-      );
-    } else {
-      return filteredData.filter((accomplishment) =>
-        accomplishment.accomplishment_date?.includes(dateStr)
-      );
-    }
-  }, [filteredData, selectedDate, selectedHistory]);
-
-  // Apply month filter
-  const filteredDataWithMonth = useMemo(() => {
-    if (selectedMonth === ALL_MONTHS) return filteredDataWithDate;
-
-    if (selectedHistory === "violationhistory") {
-      return filteredDataWithDate.filter((violation) =>
-        violation.violation_date?.startsWith(selectedMonth)
-      );
-    } else {
-      return filteredDataWithDate.filter((accomplishment) =>
-        accomplishment.accomplishment_date?.startsWith(selectedMonth)
-      );
-    }
-  }, [filteredDataWithDate, selectedMonth, selectedHistory]);
-
-  // Apply class filter dan urutkan dari terbaru
+  // Filter data berdasarkan semua kriteria sekaligus (berlapis)
   const finalFilteredData = useMemo(() => {
-    let filtered = filteredDataWithMonth;
+    if (selectedHistory === "violationhistory") {
+      let filtered = violationsData;
 
-    if (selectedClassId !== ALL_CLASSES) {
-      const classIdNum = parseInt(selectedClassId);
-      filtered = filtered.filter(
-        (item) => item.student?.classroom?.id === classIdNum
-      );
+      // Filter berdasarkan search text
+      if (searchText) {
+        filtered = filtered.filter((violation) => {
+          const studentName = violation.student?.name?.toLowerCase() || "";
+          const nis = violation.student?.nis?.toLowerCase() || "";
+          const violationType =
+            violation.rules_of_conduct?.name?.toLowerCase() || "";
+          const violationDate = violation.violation_date?.toLowerCase() || "";
+          const action = violation.action?.toLowerCase() || "";
+
+          return (
+            studentName.includes(searchText.toLowerCase()) ||
+            nis.includes(searchText.toLowerCase()) ||
+            violationType.includes(searchText.toLowerCase()) ||
+            violationDate.includes(searchText.toLowerCase()) ||
+            action.includes(searchText.toLowerCase())
+          );
+        });
+      }
+
+      // Filter berdasarkan tanggal
+      if (selectedDate) {
+        const dateStr = formatDate(selectedDate);
+        filtered = filtered.filter((violation) =>
+          violation.violation_date?.includes(dateStr)
+        );
+      }
+
+      // Filter berdasarkan bulan
+      if (selectedMonth !== ALL_MONTHS) {
+        filtered = filtered.filter((violation) =>
+          violation.violation_date?.startsWith(selectedMonth)
+        );
+      }
+
+      // Filter berdasarkan kelas
+      if (selectedClassId !== ALL_CLASSES) {
+        const classIdNum = parseInt(selectedClassId);
+        filtered = filtered.filter(
+          (violation) => violation.student?.classroom?.id === classIdNum
+        );
+      }
+
+      return filtered;
+    } else {
+      let filtered = enhancedAccomplishments;
+
+      // Filter berdasarkan search text
+      if (searchText) {
+        filtered = filtered.filter((accomplishment) => {
+          const studentName = accomplishment.student?.name?.toLowerCase() || "";
+          const nis = accomplishment.student?.nis?.toLowerCase() || "";
+          const typeName = accomplishment.typeName?.toLowerCase() || "";
+          const rankName = accomplishment.rankName?.toLowerCase() || "";
+          const levelName = accomplishment.levelName?.toLowerCase() || "";
+          const accomplishmentDate =
+            accomplishment.accomplishment_date?.toLowerCase() || "";
+
+          return (
+            studentName.includes(searchText.toLowerCase()) ||
+            nis.includes(searchText.toLowerCase()) ||
+            typeName.includes(searchText.toLowerCase()) ||
+            rankName.includes(searchText.toLowerCase()) ||
+            levelName.includes(searchText.toLowerCase()) ||
+            accomplishmentDate.includes(searchText.toLowerCase())
+          );
+        });
+      }
+
+      // Filter berdasarkan tanggal
+      if (selectedDate) {
+        const dateStr = formatDate(selectedDate);
+        filtered = filtered.filter((accomplishment) =>
+          accomplishment.accomplishment_date?.includes(dateStr)
+        );
+      }
+
+      // Filter berdasarkan bulan
+      if (selectedMonth !== ALL_MONTHS) {
+        filtered = filtered.filter((accomplishment) =>
+          accomplishment.accomplishment_date?.startsWith(selectedMonth)
+        );
+      }
+
+      // Filter berdasarkan kelas
+      if (selectedClassId !== ALL_CLASSES) {
+        const classIdNum = parseInt(selectedClassId);
+        filtered = filtered.filter(
+          (accomplishment) =>
+            accomplishment.student?.classroom?.id === classIdNum
+        );
+      }
+
+      return filtered;
     }
-
-    return filtered.sort((a, b) => {
-      const dateA =
-        selectedHistory === "violationhistory"
-          ? new Date(a.violation_date ?? 0).getTime()
-          : new Date(a.accomplishment_date ?? 0).getTime();
-
-      const dateB =
-        selectedHistory === "violationhistory"
-          ? new Date(b.violation_date ?? 0).getTime()
-          : new Date(b.accomplishment_date ?? 0).getTime();
-
-      return dateB - dateA;
-    });
-  }, [filteredDataWithMonth, selectedClassId, selectedHistory]);
+  }, [
+    violationsData,
+    enhancedAccomplishments,
+    selectedHistory,
+    searchText,
+    selectedDate,
+    selectedMonth,
+    selectedClassId,
+  ]);
 
   // Pagination
   const totalPages = Math.ceil(
@@ -519,8 +543,8 @@ const ViewHistory = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">
               {selectedHistory === "violationhistory"
-                ? "Semua Data Pelanggaran"
-                : "Semua Data Prestasi"}
+                ? "Riwayat Pelanggaran"
+                : "Riwayat Prestasi"}
             </CardTitle>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
@@ -575,48 +599,70 @@ const ViewHistory = () => {
           {showFilters && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Filter Kelas */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">
+                      Filter Kelas
+                    </label>
+                    {selectedClassId !== ALL_CLASSES && (
+                      <button
+                        onClick={() => setSelectedClassId(ALL_CLASSES)}
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  <ComboBox
+                    options={classroomOptions}
+                    value={selectedClassId}
+                    onValueChange={handleClassChange}
+                    placeholder="Pilih Kelas"
+                    searchPlaceholder="Cari kelas..."
+                    emptyMessage="Tidak ada kelas yang ditemukan"
+                    allowClear={false}
+                    maxHeight="max-h-48"
+                    className="font-normal"
+                  />
+                </div>
+
                 {/* Filter Tanggal */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Filter Tanggal
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">
+                      Filter Tanggal
+                    </label>
+                    {selectedDate && (
+                      <button
+                        onClick={() => setSelectedDate(null)}
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                   <DatePicker
                     value={selectedDate}
                     onChange={handleDateChange}
                   />
                 </div>
 
-                {/* Filter Kelas */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Filter Kelas
-                  </label>
-                  <Select
-                    value={selectedClassId}
-                    onValueChange={handleClassChange}
-                  >
-                    <SelectTrigger className="w-full border-gray-200 focus:ring-green-400 rounded-lg">
-                      <SelectValue placeholder="Pilih Kelas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={ALL_CLASSES}>Semua Kelas</SelectItem>
-                      {classrooms?.map((classroom) => (
-                        <SelectItem
-                          key={classroom.id}
-                          value={classroom.id.toString()}
-                        >
-                          {classroom.display_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Filter Bulan */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">
-                    Filter Bulan
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-sm font-medium text-gray-700">
+                      Filter Bulan
+                    </label>
+                    {selectedMonth !== ALL_MONTHS && (
+                      <button
+                        onClick={() => setSelectedMonth(ALL_MONTHS)}
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
                   <Select
                     value={selectedMonth}
                     onValueChange={handleMonthChange}
