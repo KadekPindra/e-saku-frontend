@@ -200,8 +200,8 @@ export const useStudentHistoryExport = () => {
       const link = document.createElement("a");
       link.href = url;
 
-      const fileName = `history_export_${year ?? "all"}_${
-        month ?? "all"
+      const fileName = `history_export_${year ?? "all_year"}_${
+        month ?? "all_month"
       }_${new Date().toISOString().slice(0, 10)}.pdf`;
 
       link.setAttribute("download", fileName);
