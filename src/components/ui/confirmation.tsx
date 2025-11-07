@@ -16,6 +16,7 @@ interface ConfirmationModalProps {
   title: string;
   description: string;
   confirmText:string;
+  isLoadingExport?: boolean;
   cancelText?: string;
   items?: string;
   type: "delete" | "update" | "add" | "logout" | "report" | "export"; // Tambahkan tipe report
@@ -68,6 +69,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   title,
   description,
   confirmText,
+  isLoadingExport,
   cancelText = "Batal",
   type,
 }) => {
@@ -85,10 +87,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             {description}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-3 md:mt-3 sm:mt-4">
+        <div className={`flex flex-col gap-3 md:mt-3 sm:mt-4`}>
           <Button
             onClick={onConfirm}
             className={`${typeStyles[type].buttonColor} text-white text-base sm:text-lg`}
+            disabled={isLoadingExport === true}
           >
             {confirmText}
           </Button>
