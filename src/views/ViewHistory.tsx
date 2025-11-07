@@ -95,6 +95,7 @@ const ViewHistory = () => {
   const [isModalExportOpen, setIsModalExportOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLoadingExport, setIsLoadingExport] = useState(false);
 
   // Table states
   const [rowsPerPage, setRowsPerPage] = useState("10");
@@ -266,6 +267,8 @@ const ViewHistory = () => {
 
   const handleConfirmExportData = async () => {
     try {
+      setIsLoadingExport(true);
+      toast.loading("Mengunduh file...");
       let month: number | undefined;
       let year: number | undefined;
 
@@ -278,12 +281,15 @@ const ViewHistory = () => {
       await exportHistory(month, year);
 
       setIsModalExportOpen(false);
+      toast.dismiss();
       toast.success(
         `File berhasil diunduh${month && year ? ` (${month}/${year})` : ""}`
       );
     } catch (error) {
       console.error("Ekspor Gagal:", error);
       toast.error("Gagal mengekspor file");
+    } finally {
+      setIsLoadingExport(false);
     }
   };
 
@@ -1104,7 +1110,11 @@ const ViewHistory = () => {
       />
       <ConfirmationModal
         isOpen={isModalExportOpen}
-        onClose={() => setIsModalExportOpen(false)}
+        isLoadingExport={isLoadingExport}
+        onClose={() => {
+          setIsModalExportOpen(false);
+          setIsLoadingExport(false);
+        }}
         onConfirm={handleConfirmExportData}
         title="Konfirmasi Ekspor Data"
         description="Apakah Anda yakin ingin mengekspor data kelas ini ke dalam file excel?"
