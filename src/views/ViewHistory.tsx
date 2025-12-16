@@ -552,7 +552,7 @@ const ViewHistory = () => {
               className="text-green-600 hover:text-white hover:bg-green-600 border border-green-500 transition-all duration-300 w-full sm:w-auto"
             >
               <UploadIcon className="mr-2 h-4 w-4" />
-              Ekspor ke Excel
+              Ekspor ke PDF
             </Button>
           </div>
         </div>
