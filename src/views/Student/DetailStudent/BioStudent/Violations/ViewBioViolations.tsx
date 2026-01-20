@@ -51,7 +51,7 @@ const ViewBioViolations = () => {
 
   const [userType, setUserType] = useState<"teacher" | "student">("teacher");
   const [violationToDelete, setViolationToDelete] = useState<number | null>(
-    null
+    null,
   );
   const { id } = useParams();
   const studentId = id ?? "";
@@ -162,7 +162,7 @@ const ViewBioViolations = () => {
   };
 
   const hasActiveFilters = Object.values(filters).some(
-    (filter) => filter !== ""
+    (filter) => filter !== "",
   );
 
   const mappedViolations = studentViolations.map((violation) => ({
@@ -203,7 +203,7 @@ const ViewBioViolations = () => {
 
   const totalPoints = studentViolations.reduce(
     (sum, violation) => sum + violation.points,
-    0
+    0,
   );
 
   const itemsPerPage = parseInt(rowsPerPage);
@@ -457,7 +457,7 @@ const ViewBioViolations = () => {
                         {violation.type}
                       </TableCell>
                       <TableCell className="text-center py-4 px-4">
-                        <span className="text-gray-600">
+                        <span className="text-gray-600 break-words whitespace-normal max-w-xs inline-block">
                           {violation.description}
                         </span>
                       </TableCell>
@@ -480,8 +480,8 @@ const ViewBioViolations = () => {
                               handleOpenImageModal(
                                 `${import.meta.env.VITE_API_URL?.replace(
                                   "/api",
-                                  "/public"
-                                )}${violation.image_documentation}`
+                                  "/public",
+                                )}${violation.image_documentation}`,
                               )
                             }
                             className="inline-block bg-blue-500 text-white font-semibold px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
@@ -632,8 +632,8 @@ const ViewBioViolations = () => {
                               handleOpenImageModal(
                                 `${import.meta.env.VITE_API_URL?.replace(
                                   "/api",
-                                  "/public"
-                                )}${violation.image_documentation}`
+                                  "/public",
+                                )}${violation.image_documentation}`,
                               )
                             }
                             className="inline-block bg-blue-500 text-white font-semibold px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
