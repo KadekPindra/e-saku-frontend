@@ -581,7 +581,7 @@ const ViewDashboard = () => {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-2 mb-4 sm:mb-6">
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight">
-          Halo🙌, <span className="text-green-500">{userName}</span>
+          Halo test 🙌, <span className="text-green-500">{userName}</span>
           {userRole === "student" ? " (Siswa)" : " (Guru)"}
         </h1>
         <p className="text-md sm:text-xl lg:text-2xl font-bold leading-tight">
