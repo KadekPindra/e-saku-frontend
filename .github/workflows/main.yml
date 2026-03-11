@@ -1,1 +1,58 @@
+name: Deploy React Safely
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build project
+        run: npm run build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Backup old build on server
+        run: |
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          cd ${{ secrets.SERVER_PATH }}
+
+          DATE=$(date +"%Y-%m-%d_%H-%M")
+
+          mkdir -p backup/$DATE
+
+          if [ -d "assets" ]; then
+            mv assets backup/$DATE/
+          fi
+
+          if [ -f "index.html" ]; then
+            mv index.html backup/$DATE/
+          fi
+          EOF
+
+      - name: Upload new build
+        run: |
+          scp -P ${{ secrets.SERVER_PORT }} dist/index.html \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
+
+          scp -P ${{ secrets.SERVER_PORT }} -r dist/assets \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
