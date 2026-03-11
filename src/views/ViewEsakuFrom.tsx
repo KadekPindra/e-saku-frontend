@@ -173,7 +173,6 @@ const ESakuForm: React.FC = () => {
   const dragCounter = useRef<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  // Format classroom options for ComboBox
   const classroomOptions = useMemo((): ComboBoxOption[] => {
     let filtered = classrooms || [];
 
