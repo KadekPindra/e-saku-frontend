@@ -1,4 +1,4 @@
-name: Deploy React Safely
+name: Deploy React Safe Backup
 
 on:
   push:
@@ -34,19 +34,16 @@ jobs:
       - name: Backup old build
         run: |
           ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-          cd ${{ secrets.SERVER_PATH }} && 
-          DATE=\$(date +%Y-%m-%d_%H-%M) &&
-          mkdir -p backup/\$DATE &&
-          [ -d assets ] && mv assets backup/\$DATE/ || true &&
-          [ -f index.html ] && mv index.html backup/\$DATE/ || true
+          cd ${{ secrets.SERVER_PATH }};
+          DATE=\$(date +%Y-%m-%d_%H-%M);
+          mkdir -p backup/\$DATE;
+          [ -d assets ] && mv assets backup/\$DATE/ || true;
+          [ -f index.html ] && mv index.html backup/\$DATE/ || true;
           "
 
-      - name: Upload new index.html
+      - name: Upload new build
         run: |
-          scp -P ${{ secrets.SERVER_PORT }} dist/index.html \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/
-
-      - name: Upload new assets
-        run: |
-          scp -P ${{ secrets.SERVER_PORT }} -r dist/assets \
+          rsync -avz \
+          -e "ssh -p ${{ secrets.SERVER_PORT }}" \
+          dist/ \
           ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/
