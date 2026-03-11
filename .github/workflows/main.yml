@@ -31,6 +31,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Hostinger
+      - name: Deploy with rsync
         run: |
-          scp -P ${{ secrets.SERVER_PORT }} -r dist/* ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
+          rsync -avz --delete -e "ssh -p ${{ secrets.SERVER_PORT }}" dist/ \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
