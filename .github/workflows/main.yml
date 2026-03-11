@@ -31,28 +31,22 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Backup old build on server
+      - name: Backup old build
         run: |
-          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-          cd ${{ secrets.SERVER_PATH }}
+          ssh -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+          cd ${{ secrets.SERVER_PATH }} && 
+          DATE=\$(date +%Y-%m-%d_%H-%M) &&
+          mkdir -p backup/\$DATE &&
+          [ -d assets ] && mv assets backup/\$DATE/ || true &&
+          [ -f index.html ] && mv index.html backup/\$DATE/ || true
+          "
 
-          DATE=$(date +"%Y-%m-%d_%H-%M")
-
-          mkdir -p backup/$DATE
-
-          if [ -d "assets" ]; then
-            mv assets backup/$DATE/
-          fi
-
-          if [ -f "index.html" ]; then
-            mv index.html backup/$DATE/
-          fi
-          EOF
-
-      - name: Upload new build
+      - name: Upload new index.html
         run: |
           scp -P ${{ secrets.SERVER_PORT }} dist/index.html \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/
 
+      - name: Upload new assets
+        run: |
           scp -P ${{ secrets.SERVER_PORT }} -r dist/assets \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/
