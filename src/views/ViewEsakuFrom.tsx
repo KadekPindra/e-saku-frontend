@@ -620,6 +620,7 @@ const ESakuForm: React.FC = () => {
     const isValid = validateForm();
     if (!isValid) return;
     setIsSubmitting(true);
+    const formattedDate = date.toLocaleDateString("sv-SE");
 
     let studentObj;
     if (isEditMode) {
@@ -667,7 +668,7 @@ const ESakuForm: React.FC = () => {
           student_id: studentObj.id.toString(),
           rulesofconduct_id: violations.map((v) => v.id),
           description,
-          violation_date: date.toISOString().split("T")[0],
+          violation_date: formattedDate,
           teacher_id: teacherId,
           action: followUpType === "lainnya" ? customFollowUp : followUpType,
         },
@@ -736,7 +737,7 @@ const ESakuForm: React.FC = () => {
           student_id: studentObj.id.toString(),
           description,
           type_id: selectedType ? Number(selectedType.id) : 0,
-          accomplishment_date: date.toISOString().split("T")[0],
+          accomplishment_date: formattedDate,
           level_id: selectedLevel ? Number(selectedLevel.id) : 0,
           points: parseInt(point),
           rank_id: selectedRank ? Number(selectedRank.id) : 0,
@@ -776,6 +777,7 @@ const ESakuForm: React.FC = () => {
   const handleSendAsReport = (): void => {
     let studentObj;
     let classroomObj;
+    const formattedDate = date.toLocaleDateString("sv-SE");
 
     if (isEditMode) {
       if (!editData || !editData.student) {
@@ -802,7 +804,7 @@ const ESakuForm: React.FC = () => {
         const reportData = {
           student_id: studentObj.id,
           teacher_id: teacherId,
-          violation_date: date.toISOString().split("T")[0],
+          violation_date: formattedDate,
           violation_details: description,
           action: followUpType === "lainnya" ? customFollowUp : followUpType,
           rulesofconduct_id: [violation.id],
@@ -843,7 +845,7 @@ const ESakuForm: React.FC = () => {
       const reportData: any = {
         student_id: studentObj.id,
         teacher_id: teacherId,
-        violation_date: date.toISOString().split("T")[0],
+        violation_date: formattedDate,
         violation_details: description,
         action: followUpType === "lainnya" ? customFollowUp : followUpType,
         rulesofconduct_id: selectedRule?.id ?? 0,
